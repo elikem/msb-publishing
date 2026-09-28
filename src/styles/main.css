@@ -245,6 +245,19 @@ body {
   text-indent: 0;
 }
 
+.story-blank-plate {
+  width: var(--trim-w);
+  height: var(--trim-h);
+  background: linear-gradient(
+    to bottom,
+    rgb(250 246 239 / 0%) 0,
+    rgb(250 246 239 / 0%) 28%,
+    rgb(250 246 239) 28%,
+    rgb(250 246 239) 90%,
+    rgb(250 246 239 / 0%) 90%
+  );
+}
+
 .story-document .story-sheet .drop-cap {
   float: left;
   font-family: Cinzel, "EB Garamond", serif;

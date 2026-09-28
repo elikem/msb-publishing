@@ -17,8 +17,9 @@ function buildStoryHtml(paragraphs) {
     .map((raw, index) => {
       const text = raw.trim();
       if (index === 0) {
-        const letter = text.charAt(0) || 'Y';
-        const rest = text.slice(1);
+        const characters = [...text];
+        const letter = characters[0] ?? '';
+        const rest = characters.slice(1).join('');
         return `<p class="story-first"><span class="drop-cap">${escapeHtml(letter)}</span><span class="drop-rest">${escapeHtml(rest)}</span></p>`;
       }
       return `<p>${escapeHtml(text)}</p>`;
@@ -31,7 +32,7 @@ function buildStoryHtml(paragraphs) {
       .story-sheet p + p { break-before: auto; }
     </style>
     <article class="story-document">
-      <div class="story-sheet">${body || '<p class="story-first"><span class="drop-cap">Y</span><span class="drop-rest">our story begins here.</span></p>'}</div>
+      <div class="story-sheet">${body}</div>
     </article>
   `;
 }
@@ -42,6 +43,8 @@ function buildStoryHtml(paragraphs) {
  */
 export async function layoutStoryPages(paragraphs, hostEl) {
   hostEl.innerHTML = '';
+  if (!paragraphs.some((paragraph) => paragraph.trim().length > 0)) return [];
+
   const flow = document.createElement('div');
   flow.innerHTML = buildStoryHtml(paragraphs);
   hostEl.appendChild(flow);
@@ -65,6 +68,3 @@ export function paragraphsFromEditor(text) {
     .filter(Boolean);
 }
 
-export function editorTextFromParagraphs(paragraphs) {
-  return paragraphs.join('\n\n');
-}
