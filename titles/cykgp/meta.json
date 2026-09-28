@@ -1,0 +1,16 @@
+{
+  "id": "cykgp",
+  "slug": "cykgp",
+  "title": "Can You Know God Personally",
+  "trim": {
+    "widthIn": 3.5,
+    "heightIn": 4.25
+  },
+  "pageCount": 24,
+  "editableRegions": [
+    {
+      "id": "personal-story",
+      "pages": [5, 6, 7]
+    }
+  ]
+}
