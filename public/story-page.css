@@ -1,9 +1,11 @@
 /* Paged.js sheet for the personal-story region (booklet pages 5–7). */
 @page {
   size: 252pt 306pt;
-  margin: 30pt 29pt 23pt 29pt;
+  /* Side insets keep the story column centered and off the page edges. */
+  margin: 30pt 36pt 24pt 36pt;
 }
 
 @page :first {
+  /* Clear the "One Person's Search" heading on page 5. */
   margin-top: 52pt;
 }
