@@ -28,15 +28,6 @@ function buildExportPage(pageNumber, storyPageNode) {
   img.src = pageAssetUrl(pageNumber);
   img.crossOrigin = 'anonymous';
   page.appendChild(img);
-
-  if (pageNumber >= 5 && pageNumber <= 7) {
-    const plate = document.createElement('div');
-    plate.className = 'story-blank-plate';
-    plate.style.position = 'absolute';
-    plate.style.inset = '0';
-    page.appendChild(plate);
-  }
-
   return page;
 }
 

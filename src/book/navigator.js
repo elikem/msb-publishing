@@ -44,9 +44,6 @@ export function createBookNavigator({
       img.alt = `Book page ${pageNumber}`;
       img.src = pageAssetUrl(pageNumber);
       sheet.appendChild(img);
-      const plate = document.createElement('div');
-      plate.className = 'story-blank-plate';
-      overlay.appendChild(plate);
     }
     sheet.appendChild(overlay);
     return sheet;
