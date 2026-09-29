@@ -204,8 +204,9 @@ body {
   position: fixed;
   left: -10000px;
   top: 0;
-  width: 1px;
-  height: 1px;
+  /* Keep real trim metrics so Paged.js lays out at booklet size. */
+  width: var(--trim-w);
+  height: var(--trim-h);
   overflow: hidden;
   opacity: 0;
   pointer-events: none;

@@ -1,16 +1,6 @@
 import { Previewer } from 'pagedjs';
 
-const TRIM_WIDTH = '3.5in';
-const TRIM_HEIGHT = '4.25in';
-
-/** Equal side insets keep the story column centered on the trim. */
-const SIDE_MARGIN = '0.40in';
-/** Clear the folio at the bottom of pages 5–7. */
-const BOTTOM_MARGIN = '0.32in';
-/** Page 5 starts below the "One Person's Search" heading. */
-const FIRST_TOP_MARGIN = '0.72in';
-/** Pages 6–7 use a shorter top inset over the landscape art. */
-const NEXT_TOP_MARGIN = '0.42in';
+const STORY_PAGE_CSS = '/story-page.css';
 
 function escapeHtml(text) {
   return text
@@ -36,16 +26,6 @@ function buildStoryHtml(paragraphs) {
     .join('');
 
   return `
-    <style>
-      @page {
-        size: ${TRIM_WIDTH} ${TRIM_HEIGHT};
-        margin: ${NEXT_TOP_MARGIN} ${SIDE_MARGIN} ${BOTTOM_MARGIN} ${SIDE_MARGIN};
-      }
-      @page :first {
-        margin-top: ${FIRST_TOP_MARGIN};
-      }
-      .story-sheet p + p { break-before: auto; }
-    </style>
     <article class="story-document">
       <div class="story-sheet">${body}</div>
     </article>
@@ -65,7 +45,7 @@ export async function layoutStoryPages(paragraphs, hostEl) {
   hostEl.appendChild(flow);
 
   const previewer = new Previewer();
-  await previewer.preview(flow.innerHTML, [], hostEl);
+  await previewer.preview(flow.innerHTML, [STORY_PAGE_CSS], hostEl);
 
   const pages = [...hostEl.querySelectorAll('.pagedjs_page')];
   const slice = pages.slice(0, 3);

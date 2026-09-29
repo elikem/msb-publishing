@@ -1,0 +1,9 @@
+/* Paged.js sheet for the personal-story region (booklet pages 5–7). */
+@page {
+  size: 252pt 306pt;
+  margin: 30pt 29pt 23pt 29pt;
+}
+
+@page :first {
+  margin-top: 52pt;
+}
