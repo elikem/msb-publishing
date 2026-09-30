@@ -1,11 +1,26 @@
-/* Paged.js sheet for the personal-story region (booklet pages 5–7). */
+/* Paged.js sheet for the personal-story region (booklet pages 5–7).
+   Text boxes match titles/cykgp/meta.json → editableRegions[personal-story].textBoxes.
+   Trim is 252pt × 306pt. Left and right insets are equal on every page. */
+
 @page {
   size: 252pt 306pt;
-  /* Side insets keep the story column centered and off the page edges. */
-  margin: 30pt 36pt 24pt 36pt;
+  /* Pages 6 and 7. */
+  margin: 32pt 36pt 28pt 36pt;
 }
 
 @page :first {
-  /* Clear the "One Person's Search" heading on page 5. */
-  margin-top: 52pt;
+  /* Page 5 clears the "One Person's Search" heading. Sides and bottom match pages 6–7. */
+  margin: 52pt 36pt 28pt 36pt;
+}
+
+.story-document,
+.story-sheet {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+
+.story-sheet p {
+  max-width: 100%;
+  overflow-wrap: break-word;
 }

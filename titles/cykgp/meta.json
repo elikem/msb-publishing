@@ -10,7 +10,12 @@
   "editableRegions": [
     {
       "id": "personal-story",
-      "pages": [5, 6, 7]
+      "pages": [5, 6, 7],
+      "textBoxes": {
+        "5": { "topPt": 52, "rightPt": 36, "bottomPt": 28, "leftPt": 36 },
+        "6": { "topPt": 32, "rightPt": 36, "bottomPt": 28, "leftPt": 36 },
+        "7": { "topPt": 32, "rightPt": 36, "bottomPt": 28, "leftPt": 36 }
+      }
     }
   ]
 }
