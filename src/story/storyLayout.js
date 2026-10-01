@@ -1,7 +1,6 @@
 import { Previewer } from 'pagedjs';
 
-const TRIM_WIDTH = '3.5in';
-const TRIM_HEIGHT = '4.25in';
+const STORY_PAGE_CSS = '/story-page.css';
 
 function escapeHtml(text) {
   return text
@@ -17,8 +16,9 @@ function buildStoryHtml(paragraphs) {
     .map((raw, index) => {
       const text = raw.trim();
       if (index === 0) {
-        const letter = text.charAt(0) || 'Y';
-        const rest = text.slice(1);
+        const characters = [...text];
+        const letter = characters[0] ?? '';
+        const rest = characters.slice(1).join('');
         return `<p class="story-first"><span class="drop-cap">${escapeHtml(letter)}</span><span class="drop-rest">${escapeHtml(rest)}</span></p>`;
       }
       return `<p>${escapeHtml(text)}</p>`;
@@ -26,12 +26,8 @@ function buildStoryHtml(paragraphs) {
     .join('');
 
   return `
-    <style>
-      @page { size: ${TRIM_WIDTH} ${TRIM_HEIGHT}; margin: 0; }
-      .story-sheet p + p { break-before: auto; }
-    </style>
     <article class="story-document">
-      <div class="story-sheet">${body || '<p class="story-first"><span class="drop-cap">Y</span><span class="drop-rest">our story begins here.</span></p>'}</div>
+      <div class="story-sheet">${body}</div>
     </article>
   `;
 }
@@ -42,12 +38,14 @@ function buildStoryHtml(paragraphs) {
  */
 export async function layoutStoryPages(paragraphs, hostEl) {
   hostEl.innerHTML = '';
+  if (!paragraphs.some((paragraph) => paragraph.trim().length > 0)) return [];
+
   const flow = document.createElement('div');
   flow.innerHTML = buildStoryHtml(paragraphs);
   hostEl.appendChild(flow);
 
   const previewer = new Previewer();
-  await previewer.preview(flow.innerHTML, [], hostEl);
+  await previewer.preview(flow.innerHTML, [STORY_PAGE_CSS], hostEl);
 
   const pages = [...hostEl.querySelectorAll('.pagedjs_page')];
   const slice = pages.slice(0, 3);
@@ -59,12 +57,10 @@ export async function layoutStoryPages(paragraphs, hostEl) {
 }
 
 export function paragraphsFromEditor(text) {
+  // One Enter starts a new paragraph; extra blank lines collapse to a single break.
   return text
-    .split(/\n\s*\n/)
-    .map((p) => p.replace(/\n/g, ' ').trim())
+    .replace(/\r\n/g, '\n')
+    .split(/\n+/)
+    .map((p) => p.replace(/[ \t]+/g, ' ').trim())
     .filter(Boolean);
-}
-
-export function editorTextFromParagraphs(paragraphs) {
-  return paragraphs.join('\n\n');
 }

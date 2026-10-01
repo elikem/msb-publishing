@@ -1,11 +1,6 @@
 import './styles/main.css';
 import meta from '../titles/cykgp/meta.json';
-import { defaultStoryParagraphs } from './data/defaultStory.js';
-import {
-  editorTextFromParagraphs,
-  layoutStoryPages,
-  paragraphsFromEditor,
-} from './story/storyLayout.js';
+import { layoutStoryPages, paragraphsFromEditor } from './story/storyLayout.js';
 import { createBookNavigator } from './book/navigator.js';
 import { downloadPersonalizedPdf } from './export/pdfExport.js';
 
@@ -16,7 +11,7 @@ const layoutHost = document.getElementById('layout-host');
 const titleEl = document.getElementById('book-title');
 
 titleEl.textContent = meta.title;
-editor.value = editorTextFromParagraphs(defaultStoryParagraphs);
+editor.value = '';
 
 /** @type {HTMLElement[]} */
 let latestStoryPages = [];

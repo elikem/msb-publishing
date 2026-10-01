@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "generate:pages": "python3 scripts/generate-page-images.py"
+    "generate:pages": "python3 scripts/generate-page-images.py",
+    "generate:blank-story-pages": "python3 scripts/generate-blank-story-pages.py"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",
