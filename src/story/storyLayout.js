@@ -57,8 +57,10 @@ export async function layoutStoryPages(paragraphs, hostEl) {
 }
 
 export function paragraphsFromEditor(text) {
+  // One Enter starts a new paragraph; extra blank lines collapse to a single break.
   return text
-    .split(/\n\s*\n/)
-    .map((p) => p.replace(/\n/g, ' ').trim())
+    .replace(/\r\n/g, '\n')
+    .split(/\n+/)
+    .map((p) => p.replace(/[ \t]+/g, ' ').trim())
     .filter(Boolean);
 }
