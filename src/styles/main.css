@@ -186,6 +186,11 @@ body {
   background: transparent !important;
 }
 
+.pagedjs_page_content,
+.pagedjs_area {
+  overflow: hidden;
+}
+
 .book-controls {
   display: flex;
   align-items: center;
@@ -212,14 +217,19 @@ body {
   pointer-events: none;
 }
 
-/* Paged.js story source (layout host) and cloned preview pages */
-.story-document {
-  width: var(--trim-w);
+/* Paged.js story source (layout host) and cloned preview pages.
+   The sheet fills the page text box. It must not reuse the full trim width. */
+.story-document,
+.story-document .story-sheet,
+.pagedjs_page .story-document,
+.pagedjs_page .story-sheet {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 
 .story-document .story-sheet,
 .pagedjs_page {
-  box-sizing: border-box;
   font-family: "EB Garamond", Georgia, serif;
   font-size: 9pt;
   line-height: 12pt;
@@ -228,12 +238,10 @@ body {
   background: transparent;
 }
 
-.story-document .story-sheet {
-  width: var(--trim-w);
-}
-
 .story-document .story-sheet p,
 .pagedjs_page p {
+  box-sizing: border-box;
+  max-width: 100%;
   margin: 0 0 12pt;
   text-indent: 9pt;
   overflow-wrap: break-word;
