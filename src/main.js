@@ -1,5 +1,6 @@
 import './styles/main.css';
-import meta from '../titles/cykgp/meta.json';
+import { loadTitle } from './titles/catalog.js';
+import { applyTitleChrome, formatPageSpan, primaryRegion } from './titles/region.js';
 import { layoutStoryPages, paragraphsFromEditor } from './story/storyLayout.js';
 import { createBookNavigator } from './book/navigator.js';
 import { downloadPersonalizedPdf } from './export/pdfExport.js';
@@ -13,7 +14,7 @@ const mobileTitle = document.getElementById('mobile-title');
 const mobileEyebrow = document.getElementById('mobile-eyebrow');
 const editableBadge = document.getElementById('editable-badge');
 const fillLabel = document.getElementById('fill-label');
-const fillBars = [...document.querySelectorAll('#fill-meter .fill-bars i')];
+const fillBarsHost = document.querySelector('#fill-meter .fill-bars');
 const openWriterBtn = document.getElementById('open-writer');
 const closeWriterBtn = document.getElementById('close-writer');
 const peekBookBtn = document.getElementById('peek-book');
@@ -21,18 +22,59 @@ const savePreviewBtn = document.getElementById('save-preview');
 const sheetBackdrop = document.getElementById('sheet-backdrop');
 const finishScreen = document.getElementById('finish-screen');
 const finishStoryPages = document.getElementById('finish-story-pages');
+const finishPageCount = document.getElementById('finish-page-count');
+const finishLede = document.getElementById('finish-lede');
+const storyHint = document.getElementById('story-hint');
+const jumpStoryBtn = document.getElementById('jump-story');
+const editorHeading = document.querySelector('#editor-sheet h2');
 const openFinishBtn = document.getElementById('open-finish');
 const finishEditBtn = document.getElementById('finish-edit');
 const finishCloseBtn = document.getElementById('finish-close');
 const finishDownloadBtn = document.getElementById('finish-download');
 const downloadPdfBtn = document.getElementById('download-pdf');
 
-titleEl.textContent = meta.title;
-if (mobileTitle) mobileTitle.textContent = meta.title;
+const requestedSlug = new URLSearchParams(location.search).get('title') || undefined;
+
+let title;
+try {
+  title = loadTitle(requestedSlug);
+} catch (error) {
+  console.error(error);
+  stage.replaceChildren(Object.assign(document.createElement('p'), {
+    className: 'hint',
+    textContent: error.message,
+  }));
+  throw error;
+}
+
+const region = primaryRegion(title);
+const pageSpan = formatPageSpan(region.pages);
+const storyPageStart = region.pages[0];
+
+applyTitleChrome(title);
+document.title = `${title.title} — My Story Booklet`;
+titleEl.textContent = title.title;
+if (mobileTitle) mobileTitle.textContent = title.title;
+if (editorHeading) editorHeading.textContent = region.label;
+if (storyHint) {
+  const lead = pageSpan.charAt(0).toUpperCase() + pageSpan.slice(1);
+  storyHint.textContent = `${lead} in the booklet. Press Enter for a new paragraph. The preview updates as you type.`;
+}
+if (jumpStoryBtn) jumpStoryBtn.textContent = `Jump to story (page ${storyPageStart})`;
+if (finishPageCount) finishPageCount.textContent = String(title.pageCount);
+if (finishLede) {
+  finishLede.textContent = `${title.pageCount} pages including your story on ${pageSpan}. Download the personalized PDF to keep or print.`;
+}
 editor.value = '';
 
-const storyPageStart = meta.editableRegions?.[0]?.pages?.[0] ?? 5;
-const storyPageCapacity = meta.editableRegions?.[0]?.pages?.length ?? 3;
+fillBarsHost.replaceChildren(
+  ...region.pages.map((_, index) => {
+    const bar = document.createElement('i');
+    bar.dataset.slot = String(index);
+    return bar;
+  }),
+);
+const fillBars = [...fillBarsHost.children];
 
 /** @type {HTMLElement[]} */
 let latestStoryPages = [];
@@ -42,13 +84,13 @@ function isMobilePocket() {
 }
 
 function updateFillMeter(filledCount) {
-  const filled = Math.min(storyPageCapacity, Math.max(0, filledCount));
+  const filled = Math.min(region.pages.length, Math.max(0, filledCount));
   const hasText = Boolean(editor.value.trim());
   fillBars.forEach((bar, index) => {
     bar.classList.toggle('full', index < filled);
     bar.classList.toggle('partial', hasText && filled === 0 && index === 0);
   });
-  fillLabel.textContent = `${filled} of ${storyPageCapacity} pages`;
+  fillLabel.textContent = `${filled} of ${region.pages.length} pages`;
   if (finishStoryPages) finishStoryPages.textContent = String(filled);
 }
 
@@ -61,7 +103,6 @@ function openWriter() {
   document.body.classList.add('writer-open');
   sheetBackdrop.hidden = false;
   sheetBackdrop.setAttribute('aria-hidden', 'false');
-  // Focus after the sheet transition so mobile keyboards behave.
   window.setTimeout(() => editor.focus(), 280);
 }
 
@@ -89,13 +130,13 @@ function onPageChange(page, info) {
   editableBadge.hidden = !onStory;
   if (mobileEyebrow) {
     mobileEyebrow.textContent = onStory
-      ? `Your story · pages ${info.storyPages[0]}–${info.storyPages[info.storyPages.length - 1]}`
+      ? `${region.label} · ${formatPageSpan(info.regionPages)}`
       : 'My Story Booklet';
   }
 }
 
 const book = createBookNavigator({
-  meta,
+  meta: title,
   stageEl: stage,
   indicatorEl: indicator,
   onPageChange,
@@ -108,10 +149,10 @@ async function relayoutStory() {
   const generation = ++layoutGeneration;
   const paragraphs = paragraphsFromEditor(editor.value);
   layoutHost.innerHTML = '';
-  const pages = await layoutStoryPages(paragraphs, layoutHost);
+  const pages = await layoutStoryPages(paragraphs, layoutHost, title, region);
   if (generation !== layoutGeneration) return;
   latestStoryPages = pages;
-  book.setStoryPages(pages);
+  book.setRegionPages(region.id, pages);
   updateFillMeter(pages.length);
   syncWriterCta();
 }
@@ -129,7 +170,7 @@ async function runDownload(button) {
   button.textContent = 'Preparing PDF…';
   try {
     await relayoutStory();
-    await downloadPersonalizedPdf(meta, latestStoryPages);
+    await downloadPersonalizedPdf(title, { [region.id]: latestStoryPages });
   } catch (err) {
     console.error(err);
     alert('PDF export failed. See console for details.');
@@ -197,7 +238,6 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-// Touch swipe on book viewport
 const viewport = document.getElementById('book-viewport');
 let touchStartX = null;
 viewport.addEventListener(
@@ -227,12 +267,7 @@ window.addEventListener('resize', () => {
     closeWriter();
     closeFinish();
   }
-  const sheet = stage.querySelector('.page-sheet.story-page');
-  if (!sheet) return;
-  const overlay = sheet.querySelector('.story-overlay');
-  if (!overlay) return;
-  const scale = sheet.clientWidth / (3.5 * 96);
-  overlay.style.transform = `scale(${scale})`;
+  book.refit();
 });
 
 updateFillMeter(0);

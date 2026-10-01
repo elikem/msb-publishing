@@ -1,26 +1,13 @@
-function storyPagesFromMeta(meta) {
-  const region = meta.editableRegions?.[0];
-  if (!region?.pages?.length) return [5, 6, 7];
-  return [...region.pages];
-}
+import { pageAssetUrl, regionForPage } from '../titles/region.js';
 
-export function createBookNavigator({
-  meta,
-  stageEl,
-  indicatorEl,
-  onPageChange,
-}) {
+export function createBookNavigator({ meta, stageEl, indicatorEl, onPageChange }) {
   let currentPage = 1;
   const pageCount = meta.pageCount;
-  const storyPages = storyPagesFromMeta(meta);
+  const trimWidthPx = meta.trim.widthIn * 96;
   /** @type {Map<number, HTMLElement>} */
   const fixedPageCache = new Map();
-  /** @type {HTMLElement[]} */
-  let storyPageNodes = [];
-
-  function pageAssetUrl(pageNumber) {
-    return `/assets/cykgp/pages/page-${String(pageNumber).padStart(2, '0')}.png`;
-  }
+  /** @type {Map<number, HTMLElement>} */
+  const storyNodes = new Map();
 
   function buildFixedPage(pageNumber) {
     const sheet = document.createElement('div');
@@ -28,28 +15,29 @@ export function createBookNavigator({
     const img = document.createElement('img');
     img.className = 'page-bg';
     img.alt = `Book page ${pageNumber}`;
-    img.src = pageAssetUrl(pageNumber);
+    img.src = pageAssetUrl(meta, pageNumber);
     img.loading = 'lazy';
     sheet.appendChild(img);
     return sheet;
   }
 
-  function buildStoryPage(pageNumber, storyIndex) {
+  function buildStoryPage(pageNumber) {
     const sheet = document.createElement('div');
     sheet.className = 'page-sheet story-page';
 
-    const overlay = document.createElement('div');
-    overlay.className = 'story-overlay';
-    const node = storyPageNodes[storyIndex];
-    if (node) {
-      overlay.appendChild(node.cloneNode(true));
-    } else {
+    const node = storyNodes.get(pageNumber);
+    if (!node) {
       const img = document.createElement('img');
       img.className = 'page-bg';
       img.alt = `Book page ${pageNumber}`;
-      img.src = pageAssetUrl(pageNumber);
+      img.src = pageAssetUrl(meta, pageNumber);
       sheet.appendChild(img);
+      return sheet;
     }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'story-overlay';
+    overlay.appendChild(node.cloneNode(true));
     sheet.appendChild(overlay);
     return sheet;
   }
@@ -57,17 +45,16 @@ export function createBookNavigator({
   function fitStoryOverlay(sheet) {
     const overlay = sheet.querySelector('.story-overlay');
     if (!overlay) return;
-    const scale = sheet.clientWidth / (3.5 * 96);
-    overlay.style.transform = `scale(${scale})`;
+    overlay.style.transform = `scale(${sheet.clientWidth / trimWidthPx})`;
   }
 
   function render() {
     stageEl.replaceChildren();
 
+    const region = regionForPage(meta, currentPage);
     let sheet;
-    const storyIndex = storyPages.indexOf(currentPage);
-    if (storyIndex >= 0) {
-      sheet = buildStoryPage(currentPage, storyIndex);
+    if (region) {
+      sheet = buildStoryPage(currentPage);
     } else {
       if (!fixedPageCache.has(currentPage)) {
         fixedPageCache.set(currentPage, buildFixedPage(currentPage));
@@ -81,14 +68,20 @@ export function createBookNavigator({
     }
     indicatorEl.textContent = `Page ${currentPage} of ${pageCount}`;
     onPageChange?.(currentPage, {
-      isStoryPage: storyIndex >= 0,
-      storyPages,
+      isStoryPage: Boolean(region),
+      regionPages: region?.pages ?? [],
       pageCount,
     });
   }
 
-  function setStoryPages(nodes) {
-    storyPageNodes = nodes;
+  function setRegionPages(regionId, nodes) {
+    const region = meta.editableRegions.find((item) => item.id === regionId);
+    if (!region) return;
+    region.pages.forEach((pageNumber, index) => {
+      const node = nodes[index];
+      if (node) storyNodes.set(pageNumber, node);
+      else storyNodes.delete(pageNumber);
+    });
     render();
   }
 
@@ -105,15 +98,16 @@ export function createBookNavigator({
     goTo(currentPage - 1);
   }
 
+  function refit() {
+    const sheet = stageEl.querySelector('.page-sheet.story-page');
+    if (sheet) fitStoryOverlay(sheet);
+  }
+
   function getCurrentPage() {
     return currentPage;
   }
 
-  function getStoryPages() {
-    return storyPages;
-  }
-
   render();
 
-  return { goTo, next, prev, setStoryPages, getCurrentPage, getStoryPages };
+  return { goTo, next, prev, refit, setRegionPages, getCurrentPage };
 }

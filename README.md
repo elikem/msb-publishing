@@ -16,7 +16,7 @@ A **single-page application** that:
 
 Not in this phase: accounts, saved drafts, multi-title CMS, print PDF with bleed/crop, store EPUB, or production font licensing.
 
-InDesign (`.indd`) remains the durable design source. IDML + PDF in `source/cykgp/` drive recreation for this prototype. After the prototype works, we will define the MVP full-app stack and language.
+InDesign (`.indd`) remains the durable design source. IDML + PDF in `source/cykgp/` drive recreation for this prototype. The recreated book lives in a **title package** under `titles/<slug>/`: placement in `meta.json`, typography in `template/story.css`. The preview and PDF export read that package and do not hardcode a title. See [docs/title-packages.md](docs/title-packages.md). Open another package with `/?title=<slug>` once it exists.
 
 ## Run locally
 
@@ -30,6 +30,7 @@ Open the URL shown in the terminal (typically `http://localhost:5173`).
 ## Sources
 
 - Product brief: [docs/brief.md](docs/brief.md)
+- Title packages: [docs/title-packages.md](docs/title-packages.md)
 - Design references: [source/cykgp/](source/cykgp/) (IDML, PDF)
 
 ## Font substitutes (prototype)

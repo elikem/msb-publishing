@@ -1,14 +1,15 @@
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { pageAssetUrl, regionForPage } from '../titles/region.js';
 
-const TRIM_W_IN = 3.5;
-const TRIM_H_IN = 4.25;
-
-function pageAssetUrl(pageNumber) {
-  return `/assets/cykgp/pages/page-${String(pageNumber).padStart(2, '0')}.png`;
+function storyNodeFor(title, pageNumber, pagesByRegion) {
+  const region = regionForPage(title, pageNumber);
+  if (!region) return null;
+  const index = region.pages.indexOf(pageNumber);
+  return pagesByRegion[region.id]?.[index] ?? null;
 }
 
-function buildExportPage(pageNumber, storyPageNode) {
+function buildExportPage(title, pageNumber, storyPageNode) {
   const page = document.createElement('div');
   page.className = 'export-page';
 
@@ -16,8 +17,8 @@ function buildExportPage(pageNumber, storyPageNode) {
     const overlay = document.createElement('div');
     overlay.className = 'story-overlay';
     overlay.style.transform = 'none';
-    overlay.style.width = '3.5in';
-    overlay.style.height = '4.25in';
+    overlay.style.width = `${title.trim.widthIn}in`;
+    overlay.style.height = `${title.trim.heightIn}in`;
     overlay.style.position = 'relative';
     overlay.appendChild(storyPageNode.cloneNode(true));
     page.appendChild(overlay);
@@ -25,47 +26,45 @@ function buildExportPage(pageNumber, storyPageNode) {
   }
 
   const img = document.createElement('img');
-  img.src = pageAssetUrl(pageNumber);
+  img.src = pageAssetUrl(title, pageNumber);
   img.crossOrigin = 'anonymous';
   page.appendChild(img);
   return page;
 }
 
 /**
- * @param {{ pageCount: number, slug: string }} meta
- * @param {HTMLElement[]} storyPageNodes - up to 3 nodes for pages 5–7
+ * @param {object} title
+ * @param {Record<string, HTMLElement[]>} pagesByRegion
  */
-export async function downloadPersonalizedPdf(meta, storyPageNodes) {
+export async function downloadPersonalizedPdf(title, pagesByRegion) {
+  const widthIn = title.trim.widthIn;
+  const heightIn = title.trim.heightIn;
   const host = document.getElementById('export-host');
   host.innerHTML = '';
   host.classList.remove('offscreen');
   host.style.position = 'fixed';
   host.style.left = '0';
   host.style.top = '0';
-  host.style.width = `${TRIM_W_IN}in`;
+  host.style.width = `${widthIn}in`;
   host.style.height = 'auto';
   host.style.opacity = '1';
   host.style.pointerEvents = 'none';
   host.style.zIndex = '-1';
 
   const pages = [];
-  for (let n = 1; n <= meta.pageCount; n += 1) {
-    let storyNode = null;
-    if (n >= 5 && n <= 7) {
-      storyNode = storyPageNodes[n - 5] ?? null;
-    }
-    const el = buildExportPage(n, storyNode);
+  for (let pageNumber = 1; pageNumber <= title.pageCount; pageNumber += 1) {
+    const el = buildExportPage(title, pageNumber, storyNodeFor(title, pageNumber, pagesByRegion));
     host.appendChild(el);
     pages.push(el);
   }
 
   await document.fonts.ready;
-  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
   const pdf = new jsPDF({
     orientation: 'portrait',
     unit: 'in',
-    format: [TRIM_W_IN, TRIM_H_IN],
+    format: [widthIn, heightIn],
   });
 
   for (let i = 0; i < pages.length; i += 1) {
@@ -76,11 +75,11 @@ export async function downloadPersonalizedPdf(meta, storyPageNodes) {
       logging: false,
     });
     const imgData = canvas.toDataURL('image/jpeg', 0.92);
-    if (i > 0) pdf.addPage([TRIM_W_IN, TRIM_H_IN]);
-    pdf.addImage(imgData, 'JPEG', 0, 0, TRIM_W_IN, TRIM_H_IN);
+    if (i > 0) pdf.addPage([widthIn, heightIn]);
+    pdf.addImage(imgData, 'JPEG', 0, 0, widthIn, heightIn);
   }
 
-  pdf.save(`${meta.slug}-personalized.pdf`);
+  pdf.save(`${title.slug}-personalized.pdf`);
 
   host.innerHTML = '';
   host.classList.add('offscreen');

@@ -1,15 +1,38 @@
 {
+  "schemaVersion": 1,
   "id": "cykgp",
   "slug": "cykgp",
   "title": "Can You Know God Personally",
+  "source": {
+    "directory": "source/cykgp",
+    "note": "Designer inputs (IDML and PDF). The app never reads this folder."
+  },
   "trim": {
     "widthIn": 3.5,
-    "heightIn": 4.25
+    "heightIn": 4.25,
+    "widthPt": 252,
+    "heightPt": 306
   },
   "pageCount": 24,
+  "color": {
+    "accent": "#B23600"
+  },
+  "assets": {
+    "pagePattern": "/assets/cykgp/pages/page-{nn}.png"
+  },
+  "template": {
+    "storyCss": "template/story.css",
+    "substitutes": {
+      "body": "EB Garamond for Adobe Garamond",
+      "display": "Cinzel for Requiem"
+    }
+  },
   "editableRegions": [
     {
       "id": "personal-story",
+      "label": "Your story",
+      "flow": "continuous",
+      "opening": "drop-cap",
       "pages": [5, 6, 7],
       "textBoxes": {
         "5": { "topPt": 52, "rightPt": 36, "bottomPt": 28, "leftPt": 36 },

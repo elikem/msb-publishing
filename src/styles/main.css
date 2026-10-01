@@ -8,8 +8,11 @@
   --border: #ddd3c7;
   --chrome: #12100e;
   --chrome-2: #1c1714;
+  /* Set again from the loaded title package. */
   --trim-w: 3.5in;
   --trim-h: 4.25in;
+  --trim-w-num: 3.5;
+  --trim-h-num: 4.25;
   --ui: "Source Sans 3", system-ui, sans-serif;
 }
 
@@ -215,7 +218,7 @@ body {
 .page-stage {
   position: relative;
   width: min(92vw, calc(var(--trim-w) * 1.35));
-  aspect-ratio: 350 / 425;
+  aspect-ratio: var(--trim-w-num) / var(--trim-h-num);
   filter: drop-shadow(0 14px 28px rgb(0 0 0 / 18%));
 }
 
@@ -247,16 +250,16 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 3.5in;
-  height: 4.25in;
+  width: var(--trim-w);
+  height: var(--trim-h);
   transform-origin: top left;
   pointer-events: none;
   z-index: 2;
 }
 
 .page-sheet .story-overlay .pagedjs_page {
-  width: 3.5in !important;
-  height: 4.25in !important;
+  width: var(--trim-w) !important;
+  height: var(--trim-h) !important;
   margin: 0 !important;
   box-shadow: none !important;
   background-size: cover !important;
@@ -402,56 +405,6 @@ body {
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
-}
-
-.story-document,
-.story-document .story-sheet,
-.pagedjs_page .story-document,
-.pagedjs_page .story-sheet {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 100%;
-}
-
-.story-document .story-sheet,
-.pagedjs_page {
-  font-family: "EB Garamond", Georgia, serif;
-  font-size: 9pt;
-  line-height: 12pt;
-  text-align: justify;
-  color: #1a1a1a;
-  background: transparent;
-}
-
-.story-document .story-sheet p,
-.pagedjs_page p {
-  box-sizing: border-box;
-  max-width: 100%;
-  margin: 0 0 12pt;
-  text-indent: 9pt;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-}
-
-.story-document .story-sheet p:last-child,
-.pagedjs_page p:last-child {
-  margin-bottom: 0;
-}
-
-.story-document .story-sheet p.story-first,
-.pagedjs_page p.story-first {
-  text-indent: 0;
-}
-
-.story-document .story-sheet .drop-cap,
-.pagedjs_page .drop-cap {
-  float: left;
-  font-family: Cinzel, "EB Garamond", serif;
-  font-size: 26pt;
-  line-height: 0.82;
-  color: var(--accent);
-  margin: 0.02in 0.04in 0 0;
-  font-weight: 600;
 }
 
 .export-page {

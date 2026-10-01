@@ -1,6 +1,5 @@
 import { Previewer } from 'pagedjs';
-
-const STORY_PAGE_CSS = '/story-page.css';
+import { compileRegionPageCss, pageAssetUrl, pinTextBox, renderTemplateCss } from '../titles/region.js';
 
 function escapeHtml(text) {
   return text
@@ -10,12 +9,12 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;');
 }
 
-function buildStoryHtml(paragraphs) {
+function buildStoryHtml(paragraphs, region) {
   const body = paragraphs
-    .filter((p) => p.trim().length > 0)
+    .filter((paragraph) => paragraph.trim().length > 0)
     .map((raw, index) => {
       const text = raw.trim();
-      if (index === 0) {
+      if (index === 0 && region.opening === 'drop-cap') {
         const characters = [...text];
         const letter = characters[0] ?? '';
         const rest = characters.slice(1).join('');
@@ -32,28 +31,41 @@ function buildStoryHtml(paragraphs) {
   `;
 }
 
+function cssObjectUrl(cssText) {
+  return URL.createObjectURL(new Blob([cssText], { type: 'text/css' }));
+}
+
 /**
- * Paginate story paragraphs into up to three page DOM nodes (pages 5–7).
+ * Paginate one continuous region into one DOM page per booklet page.
  * @returns {Promise<HTMLElement[]>}
  */
-export async function layoutStoryPages(paragraphs, hostEl) {
+export async function layoutStoryPages(paragraphs, hostEl, title, region) {
   hostEl.innerHTML = '';
   if (!paragraphs.some((paragraph) => paragraph.trim().length > 0)) return [];
 
+  document.querySelectorAll('style[data-pagedjs-inserted-styles]').forEach((style) => {
+    style.dataset.pagedjsStale = 'true';
+  });
   const flow = document.createElement('div');
-  flow.innerHTML = buildStoryHtml(paragraphs);
+  flow.innerHTML = buildStoryHtml(paragraphs, region);
   hostEl.appendChild(flow);
 
-  const previewer = new Previewer();
-  await previewer.preview(flow.innerHTML, [STORY_PAGE_CSS], hostEl);
+  const sheetUrl = cssObjectUrl(`${renderTemplateCss(title)}\n${compileRegionPageCss(title, region)}`);
+  try {
+    const previewer = new Previewer();
+    await previewer.preview(flow.innerHTML, [sheetUrl], hostEl);
+  } finally {
+    URL.revokeObjectURL(sheetUrl);
+  }
 
-  const pages = [...hostEl.querySelectorAll('.pagedjs_page')];
-  const slice = pages.slice(0, 3);
-  slice.forEach((pageEl, index) => {
-    const pageNumber = 5 + index;
-    pageEl.style.backgroundImage = `url(/assets/cykgp/pages/page-${String(pageNumber).padStart(2, '0')}.png)`;
+  const pages = [...hostEl.querySelectorAll('.pagedjs_page')].slice(0, region.pages.length);
+  pages.forEach((pageEl, index) => {
+    const pageNumber = region.pages[index];
+    pinTextBox(pageEl, title, region, pageNumber);
+    pageEl.style.backgroundImage = `url(${pageAssetUrl(title, pageNumber)})`;
   });
-  return slice;
+  document.querySelectorAll('style[data-pagedjs-stale="true"]').forEach((style) => style.remove());
+  return pages;
 }
 
 export function paragraphsFromEditor(text) {
@@ -61,6 +73,6 @@ export function paragraphsFromEditor(text) {
   return text
     .replace(/\r\n/g, '\n')
     .split(/\n+/)
-    .map((p) => p.replace(/[ \t]+/g, ' ').trim())
+    .map((paragraph) => paragraph.replace(/[ \t]+/g, ' ').trim())
     .filter(Boolean);
 }
