@@ -26,3 +26,10 @@ Ship a **prototype SPA** that proves live personalization of CYKGP pages 5–7, 
 ## When moving to MVP (later)
 
 Revisit: app language, persistence, repeatable IDML→HTML conversion workflow, server-side PDF (Paged.js CLI / WeasyPrint), print PDF with bleed/crop, true CMYK / PDF-X, licensed fonts, and hard overflow rules for the editable region.
+
+## Cursor Cloud specific instructions
+
+- Canonical setup is in the README: `npm ci`, then `npm run dev`. Vite serves the SPA at http://127.0.0.1:5173. There is no backend, database, or secret.
+- Confirm a production bundle with `npm run build`. There is no lint or test script in `package.json`.
+- Fixed-page PNGs are already in `public/assets/cykgp/pages/`. `npm run generate:pages` only regenerates those images and needs the Python package `pymupdf`, which is not required to install, build, or run the app.
+- The preview loads EB Garamond and Cinzel from Google Fonts (`fonts.googleapis.com` and `fonts.gstatic.com`).
