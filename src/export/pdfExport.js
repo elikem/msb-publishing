@@ -17,18 +17,18 @@ function storyPagesFromMeta(meta) {
   return [...region.pages];
 }
 
-async function pngToDataUrl(url) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to load page image: ${url}`);
-  }
-  const blob = await response.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error(`Failed to read page image: ${url}`));
-    reader.readAsDataURL(blob);
-  });
+async function pageArtToJpeg(url) {
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0);
+  return canvas.toDataURL('image/jpeg', 0.92);
 }
 
 function cloneStoryText(storyPageNode) {
@@ -144,8 +144,8 @@ export async function downloadPersonalizedPdf(meta, storyPageNodes) {
         const imgData = await rasterizeStoryPage(host, pageEl);
         pdf.addImage(imgData, 'JPEG', 0, 0, TRIM_W_IN, TRIM_H_IN);
       } else {
-        const dataUrl = await pngToDataUrl(pageAssetUrl(n));
-        pdf.addImage(dataUrl, 'PNG', 0, 0, TRIM_W_IN, TRIM_H_IN);
+        const dataUrl = await pageArtToJpeg(pageAssetUrl(n));
+        pdf.addImage(dataUrl, 'JPEG', 0, 0, TRIM_W_IN, TRIM_H_IN);
       }
     }
 
