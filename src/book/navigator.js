@@ -1,4 +1,8 @@
-const STORY_PAGES = [5, 6, 7];
+function storyPagesFromMeta(meta) {
+  const region = meta.editableRegions?.[0];
+  if (!region?.pages?.length) return [5, 6, 7];
+  return [...region.pages];
+}
 
 export function createBookNavigator({
   meta,
@@ -8,6 +12,7 @@ export function createBookNavigator({
 }) {
   let currentPage = 1;
   const pageCount = meta.pageCount;
+  const storyPages = storyPagesFromMeta(meta);
   /** @type {Map<number, HTMLElement>} */
   const fixedPageCache = new Map();
   /** @type {HTMLElement[]} */
@@ -60,8 +65,8 @@ export function createBookNavigator({
     stageEl.replaceChildren();
 
     let sheet;
-    if (STORY_PAGES.includes(currentPage)) {
-      const storyIndex = currentPage - STORY_PAGES[0];
+    const storyIndex = storyPages.indexOf(currentPage);
+    if (storyIndex >= 0) {
       sheet = buildStoryPage(currentPage, storyIndex);
     } else {
       if (!fixedPageCache.has(currentPage)) {
@@ -75,7 +80,11 @@ export function createBookNavigator({
       requestAnimationFrame(() => fitStoryOverlay(sheet));
     }
     indicatorEl.textContent = `Page ${currentPage} of ${pageCount}`;
-    onPageChange?.(currentPage);
+    onPageChange?.(currentPage, {
+      isStoryPage: storyIndex >= 0,
+      storyPages,
+      pageCount,
+    });
   }
 
   function setStoryPages(nodes) {
@@ -100,7 +109,11 @@ export function createBookNavigator({
     return currentPage;
   }
 
+  function getStoryPages() {
+    return storyPages;
+  }
+
   render();
 
-  return { goTo, next, prev, setStoryPages, getCurrentPage };
+  return { goTo, next, prev, setStoryPages, getCurrentPage, getStoryPages };
 }
