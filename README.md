@@ -2,36 +2,51 @@
 
 Web personalization for pre-designed devotionals: a reader writes their own story into a defined section of a title, and the result should read as one continuous, professionally designed booklet — not a bolted-on insert.
 
-First title: **Can You Know God Personally** (CYKGP). The system is designed for many titles; CYKGP is the prototype vehicle.
+First title: **Can You Know God Personally** (CYKGP).
 
-## Current phase: Prototype (pre-MVP)
+## Stack
 
-A **single-page application** that:
-
-- Recreates CYKGP at true trim size (**3.5in × 4.25in**, 24 pages)
-- Makes **PDF/InDesign pages 5–7** a live editable personal-story region
-- Shows **live pagination** as the reader types (Paged.js)
-- Presents the booklet in a **book-style preview** (page-by-page navigation, not a vertical scroll of all pages)
-- Provides a **Download PDF** of the personalized web edition (24 pages)
-
-Not in this phase: accounts, saved drafts, multi-title CMS, print PDF with bleed/crop, store EPUB, or production font licensing.
-
-InDesign (`.indd`) remains the durable design source. IDML + PDF in `source/cykgp/` drive recreation for this prototype. After the prototype works, we will define the MVP full-app stack and language.
+Rails 8 (Hotwire + Stimulus + esbuild + Tailwind), SQLite, passwordless **magic-link** sign-in. The booklet preview/editor/PDF flow from the former Vite prototype now lives in Rails views and Stimulus.
 
 ## Run locally
 
+Requirements: Ruby 3.3+, Node.js 20+, Yarn.
+
 ```bash
-npm install
-npm run dev
+bundle install
+yarn install
+bin/rails db:prepare
+bin/dev
 ```
 
-Open the URL shown in the terminal (typically `http://localhost:5173`).
+Open [http://localhost:3000](http://localhost:3000). Request a magic link with any email; in development the confirmation page also shows a clickable shortcut, and Letter Opener captures the email.
+
+Production-style asset build:
+
+```bash
+yarn build
+yarn build:css
+bin/rails assets:precompile
+```
+
+Tests:
+
+```bash
+bin/rails test
+```
+
+## What’s in this app
+
+- Magic-link login (email → signed token → session)
+- Authenticated CYKGP booklet: page-by-page preview, live story layout (Paged.js), client PDF download
+- Title metadata from [`titles/cykgp/meta.json`](titles/cykgp/meta.json) (editable region is data-driven)
 
 ## Sources
 
 - Product brief: [docs/brief.md](docs/brief.md)
 - Design references: [source/cykgp/](source/cykgp/) (IDML, PDF)
+- Fixed-page art: [public/booklets/cykgp/pages/](public/booklets/cykgp/pages/)
 
-## Font substitutes (prototype)
+## Font substitutes
 
-Adobe Garamond and Requiem are replaced with open-license stand-ins (EB Garamond, Cinzel). Confirm embedding rights before MVP.
+Adobe Garamond and Requiem are replaced with open-license stand-ins (EB Garamond, Cinzel) from Google Fonts. Confirm embedding rights before production print use.
