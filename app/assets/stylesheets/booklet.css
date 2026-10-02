@@ -13,7 +13,7 @@
   --ui: "Source Sans 3", system-ui, sans-serif;
   /* studio | pocket — bumped when layout breakpoints change (cache check) */
   --msb-layout: studio;
-  --msb-layout-rev: 3;
+  --msb-layout-rev: 5;
 }
 
 *,
@@ -31,9 +31,9 @@ body {
 }
 
 #app {
-  max-width: 1200px;
+  max-width: min(1400px, 100%);
   margin: 0 auto;
-  padding: 1rem 1.25rem 2rem;
+  padding: 1rem clamp(0.85rem, 2vw, 1.75rem) 2rem;
 }
 
 .app-header {
@@ -74,6 +74,7 @@ body {
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 8px 24px rgb(31 26 23 / 8%);
+  min-width: 0;
 }
 
 .sheet-handle {
@@ -210,19 +211,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: min(72vh, 640px);
-  padding: 0.75rem;
+  /* Hug the page — don't reserve a tall empty frame around a small stage */
+  min-height: 0;
+  padding: 0.35rem 0.15rem 0.5rem;
   touch-action: pan-y;
 }
 
 .page-stage {
   position: relative;
-  /* Scale with viewport height so tablets/desktops get a larger page than phones. */
-  width: min(
-    100%,
-    calc(var(--trim-w) * 1.75),
-    calc(min(72vh, 640px) * 350 / 425)
-  );
+  /*
+    Fill the book panel width first, then clamp by viewport height so the
+    page stays on-screen without leaving large side gutters.
+  */
+  width: min(100%, 40rem, calc((100dvh - 8rem) * 350 / 425));
+  max-width: 100%;
   aspect-ratio: 350 / 425;
   filter: drop-shadow(0 14px 28px rgb(0 0 0 / 18%));
 }
@@ -463,24 +465,21 @@ body {
 @media (max-width: 1100px) and (min-width: 481px) {
   #app {
     max-width: none;
-    padding: 1rem clamp(0.85rem, 2vw, 1.5rem) 1.5rem;
+    padding: 0.85rem clamp(0.65rem, 1.5vw, 1.25rem) 1.25rem;
   }
 
   .app-main {
     grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-    gap: 1rem;
+    gap: 0.85rem;
+    align-items: stretch;
   }
 
-  .book-viewport {
-    min-height: min(70vh, 640px);
+  .book-panel {
+    padding: 0.75rem;
   }
 
   .page-stage {
-    width: min(
-      100%,
-      calc(var(--trim-w) * 1.9),
-      calc(min(70vh, 640px) * 350 / 425)
-    );
+    width: min(100%, calc((100dvh - 10rem) * 350 / 425));
   }
 }
 
@@ -488,32 +487,40 @@ body {
 @media (max-width: 900px) and (min-width: 481px) {
   .app-main {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 
   .book-panel {
     order: 1;
+    /* Drop the padded card chrome so the page can use the full content width */
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
   }
 
   .editor-panel {
     order: 2;
+    padding: 0.85rem 1rem;
   }
 
   .book-viewport {
-    min-height: min(58vh, 560px);
-    padding: 0.5rem 0;
+    padding: 0;
   }
 
   .page-stage {
-    /* Fill the window — no fixed 340px phone cap */
-    width: min(
-      92vw,
-      36rem,
-      calc((min(58vh, 560px)) * 350 / 425)
-    );
+    /* Full content width; shrink only to stay within the viewport height */
+    width: min(100%, calc((100dvh - 11rem) * 350 / 425));
+    margin-inline: auto;
+  }
+
+  .book-controls {
+    margin-top: 0.55rem;
+    padding-inline: 0.15rem;
   }
 
   #story-editor {
-    min-height: 200px;
+    min-height: 180px;
   }
 
   .sheet-actions {
