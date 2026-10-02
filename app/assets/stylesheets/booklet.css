@@ -11,6 +11,9 @@
   --trim-w: 3.5in;
   --trim-h: 4.25in;
   --ui: "Source Sans 3", system-ui, sans-serif;
+  /* studio | pocket — bumped when layout breakpoints change (cache check) */
+  --msb-layout: studio;
+  --msb-layout-rev: 7;
 }
 
 *,
@@ -28,9 +31,9 @@ body {
 }
 
 #app {
-  max-width: 1200px;
+  max-width: min(1400px, 100%);
   margin: 0 auto;
-  padding: 1rem 1.25rem 2rem;
+  padding: 1rem clamp(0.85rem, 2vw, 1.75rem) 2rem;
 }
 
 .app-header {
@@ -71,6 +74,7 @@ body {
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 8px 24px rgb(31 26 23 / 8%);
+  min-width: 0;
 }
 
 .sheet-handle {
@@ -207,14 +211,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: min(70vh, 520px);
-  padding: 0.5rem;
+  /* Hug the page — don't reserve a tall empty frame around a small stage */
+  min-height: 0;
+  padding: 0.35rem 0.15rem 0.5rem;
   touch-action: pan-y;
 }
 
 .page-stage {
   position: relative;
-  width: min(92vw, calc(var(--trim-w) * 1.35));
+  /*
+    Fill the book panel width first, then clamp by viewport height so the
+    page stays on-screen without leaving large side gutters.
+  */
+  width: min(100%, 40rem, calc((100dvh - 8rem) * 350 / 425));
+  max-width: 100%;
   aspect-ratio: 350 / 425;
   filter: drop-shadow(0 14px 28px rgb(0 0 0 / 18%));
 }
@@ -451,8 +461,94 @@ body {
   visibility: hidden !important;
 }
 
-/* —— Pocket Reader (phone-first) —— */
-@media (max-width: 860px) {
+/* —— Compact studio: Stage Manager / tablets / mid-size windows —— */
+@media (max-width: 1100px) and (min-width: 481px) {
+  #app {
+    max-width: none;
+    padding: 0.85rem clamp(0.65rem, 1.5vw, 1.25rem) 1.25rem;
+  }
+
+  .app-main {
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: 0.85rem;
+    align-items: stretch;
+  }
+
+  .book-panel {
+    padding: 0.75rem;
+  }
+
+  .page-stage {
+    width: min(100%, calc((100dvh - 10rem) * 350 / 425));
+  }
+}
+
+/* Stack book above editor when the window is too narrow for two columns */
+@media (max-width: 900px) and (min-width: 481px) {
+  #app {
+    padding-inline: 0.5rem;
+  }
+
+  .app-header {
+    padding-inline: 0.15rem;
+  }
+
+  .app-main {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .book-panel {
+    order: 1;
+    /* Drop the padded card chrome so the page can use the full content width */
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .editor-panel {
+    order: 2;
+    padding: 0.85rem 1rem;
+  }
+
+  .book-viewport {
+    padding: 0;
+  }
+
+  .page-stage {
+    /* Prefer full content width; scroll the page if height overflows */
+    width: 100%;
+    max-width: none;
+    margin-inline: auto;
+  }
+
+  .book-controls {
+    margin-top: 0.55rem;
+    padding-inline: 0;
+  }
+
+  #story-editor {
+    min-height: 180px;
+  }
+
+  .sheet-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sheet-actions .btn.subtle {
+    width: auto;
+    flex: 1;
+  }
+}
+
+/* —— Pocket Reader: true phones only —— */
+@media (max-width: 480px) {
+  :root {
+    --msb-layout: pocket;
+  }
+
   body {
     background: var(--chrome);
     color: #f4ebe3;
@@ -502,7 +598,7 @@ body {
     background: linear-gradient(180deg, #161311 0%, #1c1714 40%, #241c17 100%);
     padding:
       max(0.35rem, env(safe-area-inset-top))
-      1rem
+      0.85rem
       max(0.85rem, env(safe-area-inset-bottom));
   }
 
@@ -532,7 +628,8 @@ body {
   }
 
   .page-stage {
-    width: min(86vw, 340px);
+    /* Grow with the phone viewport instead of capping at 340px */
+    width: min(92vw, calc((100dvh - 14rem) * 350 / 425));
     filter: drop-shadow(0 18px 36px rgb(0 0 0 / 45%));
   }
 

@@ -23,6 +23,8 @@ Rails.application.configure do
     config.public_file_server.headers = { "cache-control" => "public, max-age=#{2.days.to_i}" }
   else
     config.action_controller.perform_caching = false
+    # Avoid stale CSS/JS when demoing over tunnels / mobile browsers.
+    config.public_file_server.headers = { "cache-control" => "no-store" }
   end
 
   # Change to :null_store to avoid any caching.
