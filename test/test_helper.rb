@@ -13,3 +13,15 @@ module ActiveSupport
     # Add more helper methods to be used by all tests here...
   end
 end
+
+module SignInHelper
+  def sign_in_as(user)
+    token = MagicLink.generate_for(user)
+    get session_path(token: token)
+    follow_redirect! if response.redirect?
+  end
+end
+
+class ActionDispatch::IntegrationTest
+  include SignInHelper
+end

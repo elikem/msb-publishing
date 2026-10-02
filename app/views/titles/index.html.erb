@@ -1,0 +1,41 @@
+<% content_for :title, "Titles — My Story Booklet" %>
+
+<section class="catalog-shell">
+  <header class="catalog-header">
+    <div>
+      <p class="eyebrow">My Story Booklet</p>
+      <h1>Choose a title</h1>
+      <p class="catalog-lede">Personalize a published booklet, then download your PDF.</p>
+    </div>
+    <div class="header-actions">
+      <%= button_to "Sign out", session_path, method: :delete, class: "btn subtle" %>
+    </div>
+  </header>
+
+  <% if flash[:notice].present? %>
+    <p class="flash flash-notice" role="status"><%= flash[:notice] %></p>
+  <% end %>
+  <% if flash[:alert].present? %>
+    <p class="flash flash-alert" role="alert"><%= flash[:alert] %></p>
+  <% end %>
+
+  <% if @titles.empty? %>
+    <p class="catalog-empty">No published titles yet.</p>
+  <% else %>
+    <ul class="catalog-list">
+      <% @titles.each do |title| %>
+        <li class="catalog-item">
+          <%= link_to booklet_path(title.slug), class: "catalog-link" do %>
+            <span class="catalog-title"><%= title.name %></span>
+            <% if title.summary.present? %>
+              <span class="catalog-summary"><%= title.summary %></span>
+            <% end %>
+            <span class="catalog-meta">
+              Revision <%= title.current_revision&.revision || "—" %>
+            </span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>

@@ -18,11 +18,13 @@ titles/<slug>/                         the recreated template
 public/booklets/<slug>/pages/          fixed-page rasters
   page-01.png …                        addressed by meta.json
 
-app/models/title_catalog.rb            loads packages for Rails
+app/models/title.rb                    publication registry (status, current revision)
+app/models/title_revision.rb           package_path + revision label
+app/models/title_catalog.rb            loads packages from disk for Rails
 app/javascript/booklet/                paginate, preview, download
 ```
 
-`source/` is where a revision starts. `titles/<slug>/` is where the revision lands after someone recreates it for the web. Fixed pages stay under `public/` so the preview can request them by URL. `meta.json` points at those files with `assets.pagePattern`.
+`source/` is where a revision starts. `titles/<slug>/` is where the revision lands after someone recreates it for the web. Fixed pages stay under `public/` so the preview can request them by URL. `meta.json` points at those files with `assets.pagePattern`. The database registry decides which packages are published to readers.
 
 ## What is data, and what is the template
 
@@ -80,20 +82,43 @@ A second insert, on a different title or a later revision of this one, is anothe
 4. Recreate the editable type in `titles/<slug>/template/story.css`.
 5. Write `titles/<slug>/template/NOTES.md` with the source revision and anything that was matched by eye.
 6. Run `yarn check:titles`.
-7. Point `BookletsController` at the new slug when you are ready to ship it (no multi-title CMS in this prototype).
+7. Register the title in the database (see seeds / `Title` + `TitleRevision`), set `package_path` to `titles/<slug>`, then `publish!`.
 
 No change under `app/javascript/booklet/` is required for a book that fits this contract: one continuous story per region, fixed pages as images, web PDF at trim size.
 
-## How this grows into a larger app
+## Title registry
+
+The filesystem package is still the placement contract. The Rails `Title` / `TitleRevision` models are the publication registry:
+
+| Field | Role |
+| --- | --- |
+| `Title.slug` / `name` / `summary` | Catalog identity and copy |
+| `Title.status` | `draft`, `published`, or `archived` |
+| `TitleRevision.revision` | Opaque revision label (e.g. `"1"`) |
+| `TitleRevision.package_path` | Path to the package root (`titles/<slug>`) |
+| `Title.current_revision` | Which package revision readers get |
+
+Readers hit `/` for published titles and `/booklets/:slug` for the editor. Unpublished slugs 404. Placement insets are never columns on `titles`.
+
+Example (also what `db/seeds.rb` does for CYKGP):
+
+```ruby
+title = Title.find_or_initialize_by(slug: "cykgp")
+title.update!(name: "Can You Know God Personally", summary: "…")
+title.register_revision!(revision: "1", package_path: "titles/cykgp")
+title.publish!
+```
+
+## How this grows further
 
 Keep the package as the unit of publication. Split the repository later; do not invent a second way to describe a text box.
 
 | Later piece | What it stores |
 | --- | --- |
 | Conversion pipeline | Reads `source/<slug>/`, writes a title package. Re-run when InDesign changes. Still a human-guided recreation. |
-| Title registry | `slug`, revision, and the location of that package. Not a column per inset. |
+| Admin UI | Create/edit registry rows, publish/unpublish, point at a new revision. |
 | Reader draft | `{ titleSlug, revision, regions: { "personal-story": "…" } }`. Text is keyed by region id. |
 | Web app | The same engine. It loads a package and previews one page at a time. |
 | Print PDF | A second renderer can consume the same `meta.json`. Bleed and CMYK do not belong in the placement contract. |
 
-The app shell (editor, page navigator, download) stays title-agnostic. Book-specific logic stays in the package that was recreated from that book’s InDesign file.
+The app shell (catalog, editor, page navigator, download) stays title-agnostic. Book-specific logic stays in the package that was recreated from that book’s InDesign file.
