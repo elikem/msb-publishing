@@ -13,7 +13,7 @@
   --ui: "Source Sans 3", system-ui, sans-serif;
   /* studio | pocket — bumped when layout breakpoints change (cache check) */
   --msb-layout: studio;
-  --msb-layout-rev: 6;
+  --msb-layout-rev: 7;
 }
 
 *,
@@ -485,6 +485,14 @@ body {
 
 /* Stack book above editor when the window is too narrow for two columns */
 @media (max-width: 900px) and (min-width: 481px) {
+  #app {
+    padding-inline: 0.5rem;
+  }
+
+  .app-header {
+    padding-inline: 0.15rem;
+  }
+
   .app-main {
     grid-template-columns: 1fr;
     gap: 0.75rem;
