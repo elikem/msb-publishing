@@ -409,13 +409,14 @@ body {
 
 .export-page {
   position: relative;
-  width: var(--trim-w);
-  height: var(--trim-h);
+  width: calc(var(--trim-w-num) * 96px);
+  height: calc(var(--trim-h-num) * 96px);
   overflow: hidden;
   background: #fff;
 }
 
-.export-page img {
+.export-page img,
+.export-page img.page-bg {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -426,6 +427,29 @@ body {
 .export-page .story-overlay {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.export-page .story-overlay .pagedjs_page {
+  width: var(--trim-w) !important;
+  height: var(--trim-h) !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.export-page .story-overlay .pagedjs_page_content,
+.export-page .story-overlay .pagedjs_sheet {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.export-page .pagedjs_margin {
+  visibility: hidden !important;
 }
 
 /* —— Pocket Reader (phone-first) —— */
