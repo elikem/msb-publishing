@@ -1,0 +1,97 @@
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at top left, rgb(178 54 0 / 12%), transparent 40%),
+    linear-gradient(180deg, #efe6da 0%, #f8f4ee 40%, #ebe3d8 100%);
+}
+
+.auth-card {
+  width: min(100%, 28rem);
+  background: var(--panel, #fffdf9);
+  border: 1px solid var(--border, #ddd3c7);
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 16px 40px rgb(31 26 23 / 10%);
+}
+
+.auth-card h1 {
+  margin: 0.35rem 0 0;
+  font-family: Cinzel, "EB Garamond", serif;
+  font-size: clamp(1.5rem, 4vw, 1.9rem);
+  font-weight: 600;
+  color: var(--ink, #1f1a17);
+}
+
+.auth-lede {
+  margin: 0.75rem 0 1.25rem;
+  color: var(--ink-soft, #5c534c);
+  font-family: "Source Sans 3", system-ui, sans-serif;
+  line-height: 1.45;
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.auth-form label {
+  font-family: "Source Sans 3", system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink, #1f1a17);
+}
+
+.auth-form input[type="email"] {
+  width: 100%;
+  border: 1px solid var(--border, #ddd3c7);
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+  font: 400 1rem/1.4 "Source Sans 3", system-ui, sans-serif;
+  background: #fff;
+}
+
+.auth-form .btn {
+  margin-top: 0.35rem;
+}
+
+.flash {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  font-family: "Source Sans 3", system-ui, sans-serif;
+  font-size: 0.95rem;
+}
+
+.flash-notice {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.flash-alert {
+  background: #fdecea;
+  color: #8a1c1c;
+}
+
+.flash-dev {
+  background: #fff4e5;
+  color: #7a4a00;
+}
+
+.flash-dev a {
+  color: var(--accent, #b23600);
+  font-weight: 600;
+}
+
+.app-flash {
+  max-width: 1200px;
+  margin: 0 auto 0.75rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

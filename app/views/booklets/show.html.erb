@@ -1,0 +1,133 @@
+<% content_for :title, "#{@title_meta["title"]} — My Story Booklet" %>
+
+<div
+  id="app"
+  data-controller="booklet"
+  data-booklet-meta-value="<%= ERB::Util.html_escape(@title_meta.to_json) %>"
+>
+  <header class="app-header desktop-chrome">
+    <div>
+      <p class="eyebrow">My Story Booklet</p>
+      <h1 data-booklet-target="title"><%= @title_meta["title"] %></h1>
+    </div>
+    <div class="header-actions">
+      <button type="button" data-action="booklet#downloadPdf" class="btn primary">Download PDF</button>
+      <%= button_to "Sign out", session_path, method: :delete, class: "btn subtle" %>
+    </div>
+  </header>
+
+  <% if flash[:notice].present? %>
+    <p class="flash flash-notice app-flash" role="status"><%= flash[:notice] %></p>
+  <% end %>
+
+  <main class="app-main">
+    <aside class="editor-panel" data-booklet-target="editorSheet" aria-label="Story editor">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-header">
+        <h2>Your story</h2>
+        <button type="button" data-action="booklet#closeWriter" class="ghost-btn mobile-only">Done</button>
+      </div>
+      <p class="hint">
+        Pages 5–7 in the booklet. Press Enter for a new paragraph. The preview updates as you
+        type.
+      </p>
+      <div class="fill-meter" aria-live="polite">
+        <div class="fill-bars" aria-hidden="true">
+          <i data-booklet-target="fillBar"></i>
+          <i data-booklet-target="fillBar"></i>
+          <i data-booklet-target="fillBar"></i>
+        </div>
+        <span class="fill-label" data-booklet-target="fillLabel">0 of 3 pages</span>
+      </div>
+      <textarea
+        data-booklet-target="editor"
+        data-action="input->booklet#onEditorInput"
+        spellcheck="true"
+        aria-label="Personal story"
+      ></textarea>
+      <div class="sheet-actions">
+        <button type="button" data-action="booklet#jumpStory" class="btn subtle">Jump to story (page 5)</button>
+        <button type="button" data-action="booklet#peekBook" class="btn mobile-only">Peek at book</button>
+        <button type="button" data-action="booklet#savePreview" class="btn primary mobile-only">
+          Save &amp; preview
+        </button>
+      </div>
+    </aside>
+
+    <section class="book-panel" aria-label="Book preview">
+      <div class="mobile-book-meta mobile-only">
+        <p class="eyebrow" data-booklet-target="mobileEyebrow">My Story Booklet</p>
+        <h2 data-booklet-target="mobileTitle"><%= @title_meta["title"] %></h2>
+      </div>
+
+      <div
+        class="book-viewport"
+        data-booklet-target="viewport"
+        data-action="touchstart->booklet#onTouchStart touchend->booklet#onTouchEnd"
+      >
+        <div data-booklet-target="stage" class="page-stage"></div>
+        <div data-booklet-target="editableBadge" class="editable-badge" hidden>Editable</div>
+      </div>
+
+      <p class="swipe-hint mobile-only">Swipe to turn pages</p>
+
+      <nav class="book-controls" aria-label="Page navigation">
+        <button type="button" data-action="booklet#prevPage" class="btn icon-nav" aria-label="Previous page">
+          <span class="desktop-label">Previous</span>
+          <span class="mobile-label" aria-hidden="true">‹</span>
+        </button>
+        <span data-booklet-target="indicator" class="page-indicator">Page 1 of 24</span>
+        <button type="button" data-action="booklet#nextPage" class="btn icon-nav" aria-label="Next page">
+          <span class="desktop-label">Next</span>
+          <span class="mobile-label" aria-hidden="true">›</span>
+        </button>
+      </nav>
+
+      <div class="mobile-dock mobile-only">
+        <button type="button" data-action="booklet#openWriter" data-booklet-target="openWriter" class="write-cta">
+          Write your story
+        </button>
+        <button type="button" data-action="booklet#openFinish" class="btn dock-secondary">Finish</button>
+      </div>
+    </section>
+  </main>
+
+  <div
+    data-booklet-target="sheetBackdrop"
+    data-action="click->booklet#closeWriter"
+    class="sheet-backdrop mobile-only"
+    hidden
+    aria-hidden="true"
+  ></div>
+
+  <section data-booklet-target="finishScreen" class="finish-screen" hidden aria-label="Finish and download">
+    <div class="finish-card">
+      <p class="eyebrow">Ready</p>
+      <h2>Your booklet is complete</h2>
+      <p class="finish-lede">
+        24 pages including your story on pages 5–7. Download the personalized PDF to keep or
+        print.
+      </p>
+      <div class="finish-stats">
+        <div class="finish-stat">
+          <b>24</b>
+          <span>Total pages</span>
+        </div>
+        <div class="finish-stat">
+          <b data-booklet-target="finishStoryPages">0</b>
+          <span>Story pages filled</span>
+        </div>
+      </div>
+      <button type="button" data-action="booklet#downloadPdf" class="btn primary finish-download">
+        Download PDF
+      </button>
+      <button type="button" data-action="booklet#finishEdit" class="btn finish-secondary">
+        Keep editing story
+      </button>
+      <button type="button" data-action="booklet#closeFinish" class="btn finish-secondary">Back to book</button>
+    </div>
+  </section>
+</div>
+
+<div data-booklet-target="layoutHost" class="offscreen" aria-hidden="true"></div>
+<div data-booklet-target="exportHost" id="export-host" class="offscreen" aria-hidden="true"></div>

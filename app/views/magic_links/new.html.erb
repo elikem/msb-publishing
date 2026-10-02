@@ -1,0 +1,28 @@
+<% content_for :title, "Sign in — My Story Booklet" %>
+
+<section class="auth-shell">
+  <div class="auth-card">
+    <p class="eyebrow">My Story Booklet</p>
+    <h1>Sign in with a magic link</h1>
+    <p class="auth-lede">Enter your email and we’ll send a one-time link. No password needed.</p>
+
+    <% if flash[:alert].present? %>
+      <p class="flash flash-alert" role="alert"><%= flash[:alert] %></p>
+    <% end %>
+    <% if flash[:notice].present? %>
+      <p class="flash flash-notice" role="status"><%= flash[:notice] %></p>
+    <% end %>
+    <% if flash[:dev_magic_link].present? %>
+      <p class="flash flash-dev" role="status">
+        Development shortcut:
+        <%= link_to "Open magic link", flash[:dev_magic_link] %>
+      </p>
+    <% end %>
+
+    <%= form_with url: magic_link_path, method: :post, class: "auth-form", local: true do |f| %>
+      <label for="email">Email</label>
+      <%= email_field_tag :email, params[:email], required: true, autofocus: true, autocomplete: "email", placeholder: "you@example.com" %>
+      <%= submit_tag "Email me a sign-in link", class: "btn primary" %>
+    <% end %>
+  </div>
+</section>

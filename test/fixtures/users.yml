@@ -1,0 +1,3 @@
+one:
+  email: reader@example.com
+  last_signed_in_at: <%= 1.day.ago %>
