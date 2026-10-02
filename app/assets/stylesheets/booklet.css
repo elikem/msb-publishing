@@ -207,14 +207,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: min(70vh, 520px);
-  padding: 0.5rem;
+  min-height: min(72vh, 640px);
+  padding: 0.75rem;
   touch-action: pan-y;
 }
 
 .page-stage {
   position: relative;
-  width: min(92vw, calc(var(--trim-w) * 1.35));
+  /* Scale with viewport height so tablets/desktops get a larger page than phones. */
+  width: min(
+    100%,
+    calc(var(--trim-w) * 1.75),
+    calc(min(72vh, 640px) * 350 / 425)
+  );
   aspect-ratio: 350 / 425;
   filter: drop-shadow(0 14px 28px rgb(0 0 0 / 18%));
 }
@@ -451,8 +456,64 @@ body {
   visibility: hidden !important;
 }
 
-/* —— Pocket Reader (phone-first) —— */
-@media (max-width: 860px) {
+/* —— Tablet: keep studio chrome, enlarge the page —— */
+@media (max-width: 1024px) and (min-width: 641px) {
+  #app {
+    max-width: none;
+    padding: 1rem 1.25rem 1.5rem;
+  }
+
+  .app-main {
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .book-viewport {
+    min-height: min(74vh, 680px);
+  }
+
+  .page-stage {
+    width: min(
+      100%,
+      calc(var(--trim-w) * 1.85),
+      calc(min(74vh, 680px) * 350 / 425)
+    );
+  }
+}
+
+/* Narrow tablets / large phones in landscape: stack book above editor */
+@media (max-width: 860px) and (min-width: 641px) {
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+
+  .book-panel {
+    order: 1;
+  }
+
+  .editor-panel {
+    order: 2;
+  }
+
+  .book-viewport {
+    min-height: min(62vh, 560px);
+  }
+
+  .page-stage {
+    width: min(
+      78vw,
+      calc(var(--trim-w) * 1.7),
+      calc(min(62vh, 560px) * 350 / 425)
+    );
+  }
+
+  #story-editor {
+    min-height: 220px;
+  }
+}
+
+/* —— Pocket Reader (phones only) —— */
+@media (max-width: 640px) {
   body {
     background: var(--chrome);
     color: #f4ebe3;

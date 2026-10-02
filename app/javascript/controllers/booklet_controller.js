@@ -107,7 +107,7 @@ export default class extends Controller {
   }
 
   isMobilePocket() {
-    return window.matchMedia("(max-width: 860px)").matches
+    return window.matchMedia("(max-width: 640px)").matches
   }
 
   updateFillMeter(filledCount) {
