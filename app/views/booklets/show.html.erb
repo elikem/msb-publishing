@@ -40,6 +40,7 @@
         <span class="fill-label" data-booklet-target="fillLabel">0 of 3 pages</span>
       </div>
       <textarea
+        id="story-editor"
         data-booklet-target="editor"
         data-action="input->booklet#onEditorInput"
         spellcheck="true"
@@ -127,7 +128,7 @@
       <button type="button" data-action="booklet#closeFinish" class="btn finish-secondary">Back to book</button>
     </div>
   </section>
-</div>
 
-<div data-booklet-target="layoutHost" class="offscreen" aria-hidden="true"></div>
-<div data-booklet-target="exportHost" id="export-host" class="offscreen" aria-hidden="true"></div>
+  <div data-booklet-target="layoutHost" class="offscreen" aria-hidden="true"></div>
+  <div data-booklet-target="exportHost" id="export-host" class="offscreen" aria-hidden="true"></div>
+</div>
