@@ -13,7 +13,7 @@
   --ui: "Source Sans 3", system-ui, sans-serif;
   /* studio | pocket — bumped when layout breakpoints change (cache check) */
   --msb-layout: studio;
-  --msb-layout-rev: 5;
+  --msb-layout-rev: 6;
 }
 
 *,
@@ -509,14 +509,15 @@ body {
   }
 
   .page-stage {
-    /* Full content width; shrink only to stay within the viewport height */
-    width: min(100%, calc((100dvh - 11rem) * 350 / 425));
+    /* Prefer full content width; scroll the page if height overflows */
+    width: 100%;
+    max-width: none;
     margin-inline: auto;
   }
 
   .book-controls {
     margin-top: 0.55rem;
-    padding-inline: 0.15rem;
+    padding-inline: 0;
   }
 
   #story-editor {
