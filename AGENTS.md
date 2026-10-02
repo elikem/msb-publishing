@@ -9,7 +9,7 @@ Ship a **Rails** app that personalizes CYKGP pages 5–7, provides a **book-styl
 1. `docs/brief.md` — product intent and constraints
 2. `source/cykgp/*.idml` — page size, frame geometry, styles, story linkage
 3. `source/cykgp/*.pdf` — visual reference and fixed-page rasters (trim confirmed 252×306 pt)
-4. `titles/*/meta.json` — editable region metadata (not hardcoded page numbers in logic)
+4. `titles/<slug>/` — title package (`meta.json` placement + `template/story.css`); see `docs/title-packages.md`
 5. `.indd` — designer canonical file; do not treat as a parse target in-app
 
 ## App rules

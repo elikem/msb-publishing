@@ -2,11 +2,15 @@ import { Controller } from "@hotwired/stimulus"
 import { createBookNavigator } from "../booklet/navigator"
 import { layoutStoryPages, paragraphsFromEditor } from "../booklet/story_layout"
 import { downloadPersonalizedPdf } from "../booklet/pdf_export"
+import { applyTitleChrome, formatPageSpan, primaryRegion } from "../booklet/region"
 
 export default class extends Controller {
   static targets = [
     "title",
     "editor",
+    "editorHeading",
+    "storyHint",
+    "jumpStory",
     "stage",
     "indicator",
     "layoutHost",
@@ -15,11 +19,13 @@ export default class extends Controller {
     "mobileEyebrow",
     "editableBadge",
     "fillLabel",
-    "fillBar",
+    "fillBars",
     "openWriter",
     "sheetBackdrop",
     "finishScreen",
     "finishStoryPages",
+    "finishPageCount",
+    "finishLede",
     "viewport",
   ]
 
@@ -29,15 +35,41 @@ export default class extends Controller {
 
   connect() {
     this.meta = this.metaValue
-    this.storyPageStart = this.meta.editableRegions?.[0]?.pages?.[0] ?? 5
-    this.storyPageCapacity = this.meta.editableRegions?.[0]?.pages?.length ?? 3
+    this.region = primaryRegion(this.meta)
+    this.pageSpan = formatPageSpan(this.region.pages)
+    this.storyPageStart = this.region.pages[0]
+    this.storyPageCapacity = this.region.pages.length
     this.latestStoryPages = []
+    this.pagesByRegion = {}
     this.layoutTimer = null
     this.layoutGeneration = 0
     this.touchStartX = null
 
+    applyTitleChrome(this.meta)
+
     if (this.hasTitleTarget) this.titleTarget.textContent = this.meta.title
     if (this.hasMobileTitleTarget) this.mobileTitleTarget.textContent = this.meta.title
+    if (this.hasEditorHeadingTarget) this.editorHeadingTarget.textContent = this.region.label
+    if (this.hasStoryHintTarget) {
+      const lead = this.pageSpan.charAt(0).toUpperCase() + this.pageSpan.slice(1)
+      this.storyHintTarget.textContent =
+        `${lead} in the booklet. Press Enter for a new paragraph. The preview updates as you type.`
+    }
+    if (this.hasJumpStoryTarget) {
+      this.jumpStoryTarget.textContent = `Jump to story (page ${this.storyPageStart})`
+    }
+    if (this.hasFinishPageCountTarget) {
+      this.finishPageCountTarget.textContent = String(this.meta.pageCount)
+    }
+    if (this.hasFinishLedeTarget) {
+      this.finishLedeTarget.textContent =
+        `${this.meta.pageCount} pages including your story on ${this.pageSpan}. Download the personalized PDF to keep or print.`
+    }
+    if (this.hasIndicatorTarget) {
+      this.indicatorTarget.textContent = `Page 1 of ${this.meta.pageCount}`
+    }
+
+    this.buildFillBars()
     this.editorTarget.value = ""
 
     this.book = createBookNavigator({
@@ -63,6 +95,17 @@ export default class extends Controller {
     clearTimeout(this.layoutTimer)
   }
 
+  buildFillBars() {
+    if (!this.hasFillBarsTarget) return
+    this.fillBarsTarget.replaceChildren(
+      ...this.region.pages.map(() => document.createElement("i")),
+    )
+  }
+
+  fillBarElements() {
+    return this.hasFillBarsTarget ? [...this.fillBarsTarget.children] : []
+  }
+
   isMobilePocket() {
     return window.matchMedia("(max-width: 860px)").matches
   }
@@ -70,7 +113,7 @@ export default class extends Controller {
   updateFillMeter(filledCount) {
     const filled = Math.min(this.storyPageCapacity, Math.max(0, filledCount))
     const hasText = Boolean(this.editorTarget.value.trim())
-    this.fillBarTargets.forEach((bar, index) => {
+    this.fillBarElements().forEach((bar, index) => {
       bar.classList.toggle("full", index < filled)
       bar.classList.toggle("partial", hasText && filled === 0 && index === 0)
     })
@@ -124,7 +167,7 @@ export default class extends Controller {
     this.editableBadgeTarget.hidden = !onStory
     if (this.hasMobileEyebrowTarget) {
       this.mobileEyebrowTarget.textContent = onStory
-        ? `Your story · pages ${info.storyPages[0]}–${info.storyPages[info.storyPages.length - 1]}`
+        ? `Your story · ${formatPageSpan(info.regionPages)}`
         : "My Story Booklet"
     }
   }
@@ -133,10 +176,11 @@ export default class extends Controller {
     const generation = ++this.layoutGeneration
     const paragraphs = paragraphsFromEditor(this.editorTarget.value)
     this.layoutHostTarget.innerHTML = ""
-    const pages = await layoutStoryPages(paragraphs, this.layoutHostTarget)
+    const pages = await layoutStoryPages(paragraphs, this.layoutHostTarget, this.meta, this.region)
     if (generation !== this.layoutGeneration) return
     this.latestStoryPages = pages
-    this.book.setStoryPages(pages)
+    this.pagesByRegion = { [this.region.id]: pages }
+    this.book.setRegionPages(this.region.id, pages)
     this.updateFillMeter(pages.length)
     this.syncWriterCta()
   }
@@ -184,7 +228,7 @@ export default class extends Controller {
     button.textContent = "Preparing PDF…"
     try {
       await this.relayoutStory()
-      await downloadPersonalizedPdf(this.meta, this.latestStoryPages, this.exportHostTarget)
+      await downloadPersonalizedPdf(this.meta, this.pagesByRegion, this.exportHostTarget)
     } catch (err) {
       console.error(err)
       alert("PDF export failed. See console for details.")
@@ -234,11 +278,6 @@ export default class extends Controller {
       this.closeWriter()
       this.closeFinish()
     }
-    const sheet = this.stageTarget.querySelector(".page-sheet.story-page")
-    if (!sheet) return
-    const overlay = sheet.querySelector(".story-overlay")
-    if (!overlay) return
-    const scale = sheet.clientWidth / (3.5 * 96)
-    overlay.style.transform = `scale(${scale})`
+    this.book.refit()
   }
 }

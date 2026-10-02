@@ -74,6 +74,7 @@ jobs:
       - name: Install JS dependencies and build assets
         run: |
           yarn install --frozen-lockfile
+          yarn check:titles
           yarn build
           yarn build:css
 
