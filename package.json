@@ -1,12 +1,14 @@
 {
   "name": "my-story-booklet",
   "private": true,
+  "type": "module",
   "devDependencies": {
     "esbuild": "^0.28.2"
   },
   "scripts": {
     "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets",
-    "build:css": "npx @tailwindcss/cli -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --minify"
+    "build:css": "npx @tailwindcss/cli -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --minify",
+    "check:titles": "node scripts/check-title-packages.mjs"
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",

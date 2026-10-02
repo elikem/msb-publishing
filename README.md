@@ -39,11 +39,18 @@ bin/rails test
 
 - Magic-link login (email → signed token → session)
 - Authenticated CYKGP booklet: page-by-page preview, live story layout (Paged.js), client PDF download
-- Title metadata from [`titles/cykgp/meta.json`](titles/cykgp/meta.json) (editable region is data-driven)
+- Title packages under [`titles/`](titles/) — placement in `meta.json`, typography in `template/story.css` (see [docs/title-packages.md](docs/title-packages.md))
+
+Validate packages:
+
+```bash
+yarn check:titles
+```
 
 ## Sources
 
 - Product brief: [docs/brief.md](docs/brief.md)
+- Title package contract: [docs/title-packages.md](docs/title-packages.md)
 - Design references: [source/cykgp/](source/cykgp/) (IDML, PDF)
 - Fixed-page art: [public/booklets/cykgp/pages/](public/booklets/cykgp/pages/)
 

@@ -21,23 +21,19 @@
   <% end %>
 
   <main class="app-main">
-    <aside class="editor-panel" data-booklet-target="editorSheet" aria-label="Story editor">
+    <aside class="editor-panel" aria-label="Story editor">
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="sheet-header">
-        <h2>Your story</h2>
+        <h2 data-booklet-target="editorHeading"><%= @title_meta.dig("editableRegions", 0, "label") || "Your story" %></h2>
         <button type="button" data-action="booklet#closeWriter" class="ghost-btn mobile-only">Done</button>
       </div>
-      <p class="hint">
-        Pages 5–7 in the booklet. Press Enter for a new paragraph. The preview updates as you
+      <p class="hint" data-booklet-target="storyHint">
+        Your story pages in the booklet. Press Enter for a new paragraph. The preview updates as you
         type.
       </p>
       <div class="fill-meter" aria-live="polite">
-        <div class="fill-bars" aria-hidden="true">
-          <i data-booklet-target="fillBar"></i>
-          <i data-booklet-target="fillBar"></i>
-          <i data-booklet-target="fillBar"></i>
-        </div>
-        <span class="fill-label" data-booklet-target="fillLabel">0 of 3 pages</span>
+        <div class="fill-bars" data-booklet-target="fillBars" aria-hidden="true"></div>
+        <span class="fill-label" data-booklet-target="fillLabel">0 of 0 pages</span>
       </div>
       <textarea
         id="story-editor"
@@ -47,7 +43,9 @@
         aria-label="Personal story"
       ></textarea>
       <div class="sheet-actions">
-        <button type="button" data-action="booklet#jumpStory" class="btn subtle">Jump to story (page 5)</button>
+        <button type="button" data-action="booklet#jumpStory" data-booklet-target="jumpStory" class="btn subtle">
+          Jump to story
+        </button>
         <button type="button" data-action="booklet#peekBook" class="btn mobile-only">Peek at book</button>
         <button type="button" data-action="booklet#savePreview" class="btn primary mobile-only">
           Save &amp; preview
@@ -77,7 +75,7 @@
           <span class="desktop-label">Previous</span>
           <span class="mobile-label" aria-hidden="true">‹</span>
         </button>
-        <span data-booklet-target="indicator" class="page-indicator">Page 1 of 24</span>
+        <span data-booklet-target="indicator" class="page-indicator">Page 1 of <%= @title_meta["pageCount"] %></span>
         <button type="button" data-action="booklet#nextPage" class="btn icon-nav" aria-label="Next page">
           <span class="desktop-label">Next</span>
           <span class="mobile-label" aria-hidden="true">›</span>
@@ -105,13 +103,12 @@
     <div class="finish-card">
       <p class="eyebrow">Ready</p>
       <h2>Your booklet is complete</h2>
-      <p class="finish-lede">
-        24 pages including your story on pages 5–7. Download the personalized PDF to keep or
-        print.
+      <p class="finish-lede" data-booklet-target="finishLede">
+        Download the personalized PDF to keep or print.
       </p>
       <div class="finish-stats">
         <div class="finish-stat">
-          <b>24</b>
+          <b data-booklet-target="finishPageCount"><%= @title_meta["pageCount"] %></b>
           <span>Total pages</span>
         </div>
         <div class="finish-stat">
