@@ -11,6 +11,9 @@
   --trim-w: 3.5in;
   --trim-h: 4.25in;
   --ui: "Source Sans 3", system-ui, sans-serif;
+  /* studio | pocket — bumped when layout breakpoints change (cache check) */
+  --msb-layout: studio;
+  --msb-layout-rev: 3;
 }
 
 *,
@@ -456,33 +459,33 @@ body {
   visibility: hidden !important;
 }
 
-/* —— Tablet: keep studio chrome, enlarge the page —— */
-@media (max-width: 1024px) and (min-width: 641px) {
+/* —— Compact studio: Stage Manager / tablets / mid-size windows —— */
+@media (max-width: 1100px) and (min-width: 481px) {
   #app {
     max-width: none;
-    padding: 1rem 1.25rem 1.5rem;
+    padding: 1rem clamp(0.85rem, 2vw, 1.5rem) 1.5rem;
   }
 
   .app-main {
-    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
     gap: 1rem;
   }
 
   .book-viewport {
-    min-height: min(74vh, 680px);
+    min-height: min(70vh, 640px);
   }
 
   .page-stage {
     width: min(
       100%,
-      calc(var(--trim-w) * 1.85),
-      calc(min(74vh, 680px) * 350 / 425)
+      calc(var(--trim-w) * 1.9),
+      calc(min(70vh, 640px) * 350 / 425)
     );
   }
 }
 
-/* Narrow tablets / large phones in landscape: stack book above editor */
-@media (max-width: 860px) and (min-width: 641px) {
+/* Stack book above editor when the window is too narrow for two columns */
+@media (max-width: 900px) and (min-width: 481px) {
   .app-main {
     grid-template-columns: 1fr;
   }
@@ -496,24 +499,40 @@ body {
   }
 
   .book-viewport {
-    min-height: min(62vh, 560px);
+    min-height: min(58vh, 560px);
+    padding: 0.5rem 0;
   }
 
   .page-stage {
+    /* Fill the window — no fixed 340px phone cap */
     width: min(
-      78vw,
-      calc(var(--trim-w) * 1.7),
-      calc(min(62vh, 560px) * 350 / 425)
+      92vw,
+      36rem,
+      calc((min(58vh, 560px)) * 350 / 425)
     );
   }
 
   #story-editor {
-    min-height: 220px;
+    min-height: 200px;
+  }
+
+  .sheet-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sheet-actions .btn.subtle {
+    width: auto;
+    flex: 1;
   }
 }
 
-/* —— Pocket Reader (phones only) —— */
-@media (max-width: 640px) {
+/* —— Pocket Reader: true phones only —— */
+@media (max-width: 480px) {
+  :root {
+    --msb-layout: pocket;
+  }
+
   body {
     background: var(--chrome);
     color: #f4ebe3;
@@ -563,7 +582,7 @@ body {
     background: linear-gradient(180deg, #161311 0%, #1c1714 40%, #241c17 100%);
     padding:
       max(0.35rem, env(safe-area-inset-top))
-      1rem
+      0.85rem
       max(0.85rem, env(safe-area-inset-bottom));
   }
 
@@ -593,7 +612,8 @@ body {
   }
 
   .page-stage {
-    width: min(86vw, 340px);
+    /* Grow with the phone viewport instead of capping at 340px */
+    width: min(92vw, calc((100dvh - 14rem) * 350 / 425));
     filter: drop-shadow(0 18px 36px rgb(0 0 0 / 45%));
   }
 
