@@ -2,7 +2,7 @@
 
 ## Mission
 
-Ship a **Rails** app that personalizes CYKGP pages 5–7, provides a **book-style page navigator**, **web PDF download**, and **magic-link authentication**. Do not expand into multi-title CMS, print PDF with bleed/crop, or store EPUB unless explicitly asked.
+Ship a **Rails** app that personalizes titles (starting with CYKGP), provides a **title catalog**, **book-style page navigator**, **web PDF download**, and **magic-link authentication**. Titles are registered in the database (publish/unpublish + revisions) while placement packages stay on disk under `titles/<slug>/`. Do not expand into print PDF with bleed/crop, or store EPUB unless explicitly asked.
 
 ## Sources of truth
 
@@ -23,11 +23,12 @@ Ship a **Rails** app that personalizes CYKGP pages 5–7, provides a **book-styl
 - Prefer visual equivalence over pixel-perfect InDesign parity.
 - Do not embed commercial Adobe/Requiem fonts without confirmed rights; use documented substitutes.
 - Respect rights-holder restrictions in the brief when handling devotional text.
-- Keep marketing chrome minimal; core UI is sign-in + book preview + story editor + download.
+- Keep marketing chrome minimal; core UI is sign-in + title catalog + book preview + story editor + download.
+- Reader-facing routes load **published** titles only (`Title.find_published!`). Package geometry stays in `meta.json`, not columns.
 
 ## Cursor Cloud specific instructions
 
-- Canonical setup: `bundle install`, `yarn install`, `bin/rails db:prepare`, then `bin/dev` (or `bin/rails server` with `yarn build --watch` / CSS watch). App at http://127.0.0.1:3000.
+- Canonical setup: `bundle install`, `yarn install`, `bin/rails db:prepare`, `bin/rails db:seed`, then `bin/dev` (or `bin/rails server` with `yarn build --watch` / CSS watch). App at http://127.0.0.1:3000. Seed registers and publishes CYKGP.
 - Ruby via rbenv if needed (`.ruby-version`); Node for esbuild/Tailwind.
 - Confirm assets with `yarn build && yarn build:css`.
 - Fixed-page PNGs are in `public/booklets/cykgp/pages/`. Regenerating them is optional and needs `pymupdf`.

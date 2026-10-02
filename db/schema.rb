@@ -10,7 +10,32 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_02_030709) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_02_080000) do
+  create_table "title_revisions", force: :cascade do |t|
+    t.integer "title_id", null: false
+    t.string "revision", null: false
+    t.string "package_path", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["title_id", "revision"], name: "index_title_revisions_on_title_id_and_revision", unique: true
+    t.index ["title_id"], name: "index_title_revisions_on_title_id"
+  end
+
+  create_table "titles", force: :cascade do |t|
+    t.string "slug", null: false
+    t.string "name", null: false
+    t.string "status", default: "draft", null: false
+    t.text "summary"
+    t.datetime "published_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "current_revision_id"
+    t.index ["current_revision_id"], name: "index_titles_on_current_revision_id"
+    t.index ["slug"], name: "index_titles_on_slug", unique: true
+    t.index ["status"], name: "index_titles_on_status"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.datetime "last_signed_in_at"
@@ -18,4 +43,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_02_030709) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
+
+  add_foreign_key "title_revisions", "titles"
+  add_foreign_key "titles", "title_revisions", column: "current_revision_id"
 end
