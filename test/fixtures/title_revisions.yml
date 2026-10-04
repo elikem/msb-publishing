@@ -1,0 +1,11 @@
+cykgp_v1:
+  title: cykgp
+  revision: "1"
+  package_path: titles/cykgp
+  notes: Initial web recreation
+
+draft_v1:
+  title: draft_title
+  revision: "1"
+  package_path: titles/cykgp
+  notes: Reuses cykgp package path for fixture validation only

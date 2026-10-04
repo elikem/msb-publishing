@@ -16,8 +16,19 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_magic_link_path
   end
 
-  test "requires authentication for booklet" do
+  test "requires authentication for catalog" do
     get root_path
     assert_redirected_to new_magic_link_path
+  end
+
+  test "signed-in users land on the title catalog" do
+    user = users(:one)
+    token = MagicLink.generate_for(user)
+
+    get session_path(token: token)
+    assert_redirected_to root_path
+    follow_redirect!
+    assert_match(/Choose a title/, response.body)
+    assert_match(/Can You Know God Personally/, response.body)
   end
 end

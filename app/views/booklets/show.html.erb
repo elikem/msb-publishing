@@ -11,6 +11,7 @@
       <h1 data-booklet-target="title"><%= @title_meta["title"] %></h1>
     </div>
     <div class="header-actions">
+      <%= link_to "All titles", titles_path, class: "btn subtle" %>
       <button type="button" data-action="booklet#downloadPdf" class="btn primary">Download PDF</button>
       <%= button_to "Sign out", session_path, method: :delete, class: "btn subtle" %>
     </div>

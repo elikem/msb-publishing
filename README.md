@@ -16,10 +16,11 @@ Requirements: Ruby 3.3+, Node.js 20+, Yarn.
 bundle install
 yarn install
 bin/rails db:prepare
+bin/rails db:seed
 bin/dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Request a magic link with any email; in development the confirmation page also shows a clickable shortcut, and Letter Opener captures the email.
+Open [http://localhost:3000](http://localhost:3000). Request a magic link with any email; in development the confirmation page also shows a clickable shortcut, and Letter Opener captures the email. After sign-in you land on the title catalog; CYKGP is the first published title.
 
 Production-style asset build:
 
@@ -38,7 +39,8 @@ bin/rails test
 ## What’s in this app
 
 - Magic-link login (email → signed token → session)
-- Authenticated CYKGP booklet: page-by-page preview, live story layout (Paged.js), client PDF download
+- Title registry (`Title` / `TitleRevision`) with publish/unpublish — catalog at `/`, booklet at `/booklets/:slug`
+- Authenticated booklet UI: page-by-page preview, live story layout (Paged.js), client PDF download
 - Title packages under [`titles/`](titles/) — placement in `meta.json`, typography in `template/story.css` (see [docs/title-packages.md](docs/title-packages.md))
 
 Validate packages:

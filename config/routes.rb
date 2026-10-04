@@ -5,5 +5,8 @@ Rails.application.routes.draw do
   get "session", to: "sessions#create", as: :session
   delete "session", to: "sessions#destroy"
 
-  root "booklets#show"
+  resources :titles, only: :index
+  get "booklets/:slug", to: "booklets#show", as: :booklet
+
+  root "titles#index"
 end
