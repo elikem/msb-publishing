@@ -78,8 +78,10 @@ async function waitForImage(img) {
 function prepareExportHost(host, trim) {
   host.innerHTML = ""
   host.classList.remove("offscreen")
+  // Keep opacity at 1 for html2canvas, but park off-viewport so users
+  // never see the temporary capture surface during "Preparing PDF…".
   host.style.position = "fixed"
-  host.style.left = "0"
+  host.style.left = `-${trim.widthPx + 100}px`
   host.style.top = "0"
   host.style.width = `${trim.widthPx}px`
   host.style.height = `${trim.heightPx}px`
