@@ -10,6 +10,7 @@ class AuthMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [ user.email ], email.to
+    assert_equal [ MailerSettings.from_address ], email.from
     assert_match "sign-in link", email.subject
     assert_match "token=abc", email.body.encoded
   end

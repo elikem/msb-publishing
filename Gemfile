@@ -46,7 +46,10 @@ group :development, :test do
 end
 
 group :development do
-  # Use console on exceptions pages [https://guides.rubyonrails.org/web-console]
+  # Load .env for local / Cursor runs (production uses process environment).
+  gem "dotenv-rails"
+
+  # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 
   # Preview magic-link emails in the browser

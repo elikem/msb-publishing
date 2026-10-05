@@ -39,13 +39,24 @@ Rails.application.configure do
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
 
-  # Open magic-link emails in the browser during local development.
-  config.action_mailer.delivery_method = :letter_opener
+  # Use Gmail SMTP when credentials are present (same env names as production).
+  # Otherwise Letter Opener keeps `bin/rails` working without Gmail.
+  if MailerSettings.smtp_configured?
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = MailerSettings.smtp_settings
+  else
+    config.action_mailer.delivery_method = :letter_opener
+  end
   config.action_mailer.perform_deliveries = true
 
   # Set localhost to be used by links generated in mailer templates.
-  # When TUNNEL_HOST is set, prefer that public host for magic-link emails.
-  if ENV["TUNNEL_HOST"].present?
+  # APP_HOST / TUNNEL_HOST override the local default for public demos.
+  if ENV["APP_HOST"].present?
+    config.action_mailer.default_url_options = {
+      host: ENV["APP_HOST"],
+      protocol: ENV.fetch("APP_PROTOCOL", "http")
+    }
+  elsif ENV["TUNNEL_HOST"].present?
     config.action_mailer.default_url_options = { host: ENV["TUNNEL_HOST"], protocol: "https" }
   else
     config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
