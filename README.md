@@ -22,6 +22,10 @@ bin/dev
 
 Open [http://localhost:3000](http://localhost:3000). Request a magic link with any email; in development the confirmation page also shows a clickable shortcut, and Letter Opener captures the email. After sign-in you land on the title catalog; CYKGP is the first published title.
 
+## Email / magic links
+
+Production sends magic-link email over Gmail SMTP. Copy [`.env.example`](.env.example) to `.env` on a laptop or local Cursor run; leave `SMTP_*` blank to keep Letter Opener. For Cursor cloud agents, set the same names as secrets in the cloud agent environment. Production host/container env must include `SMTP_USERNAME`, `SMTP_PASSWORD`, and `APP_HOST`. See [DEPLOY.md](DEPLOY.md). Never commit a Gmail app password.
+
 Production-style asset build:
 
 ```bash

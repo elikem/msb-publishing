@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "noreply@mystorybooklet.local"
+  default from: -> { MailerSettings.from_address }
   layout "mailer"
 end
