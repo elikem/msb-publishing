@@ -9,7 +9,7 @@ cykgp_rev1:
 
 draft_rev1:
   title_locale: draft_en
-  revision: "1"
+  revision: "2"
   package_path: cykgp/en
   package_digest: d2ca927ebed395692d68d2798ea08ba826b7f8fc0fe4c7cdb66080acf4bbb317
   region_ids: '["personal-story"]'

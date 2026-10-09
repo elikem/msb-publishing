@@ -1,22 +1,63 @@
 <% content_for :admin_title, "Package #{@relative}" %>
+<% meta = JSON.parse(@meta_json) %>
+<% trim = meta["trim"] %>
+<% page_url_template = package_page_asset_path(book: @title_locale.title.slug, locale: @title_locale.locale, file: "page-{nn}.png") %>
 
-<%= form_with url: admin_update_package_path(@title_locale), method: :patch, local: true, data: { controller: "package-mapper" } do %>
-  <p class="catalog-summary">Page thumbnails for bounding-box reference (edit meta.json regions below).</p>
-  <div class="catalog-list" data-package-mapper-target="thumbs">
-    <% (1..@page_count).each do |n| %>
-      <% nn = format("%02d", n) %>
-      <img
-        src="<%= package_page_asset_path(book: @title_locale.title.slug, locale: @title_locale.locale, file: "page-#{nn}.png") %>"
-        alt="Page <%= n %>"
-        width="120"
-        data-page="<%= n %>"
-        data-action="click->package-mapper#selectPage"
-      >
-    <% end %>
+<%= form_with url: admin_update_package_path(@title_locale), method: :patch, local: true,
+      data: {
+        controller: "package-mapper",
+        package_mapper_trim_value: trim.to_json,
+        package_mapper_page_count_value: @page_count,
+        package_mapper_page_url_template_value: page_url_template,
+        package_mapper_hints_value: @hints.to_json
+      } do %>
+  <p class="catalog-summary">Drag the text box on each page thumbnail preview. Changes sync into <code>meta.json</code> below.</p>
+
+  <div class="package-mapper-layout">
+    <div class="package-mapper-thumbs" data-package-mapper-target="thumbs">
+      <% (1..@page_count).each do |n| %>
+        <% nn = format("%02d", n) %>
+        <img
+          src="<%= package_page_asset_path(book: @title_locale.title.slug, locale: @title_locale.locale, file: "page-#{nn}.png") %>"
+          alt="Page <%= n %>"
+          width="120"
+          data-page="<%= n %>"
+          data-action="click->package-mapper#selectPage"
+        >
+      <% end %>
+    </div>
+
+    <div>
+      <div class="package-mapper-toolbar">
+        <strong data-package-mapper-target="pageLabel">Page 1</strong>
+        <% if meta["editableRegions"].present? %>
+          <label>
+            Region
+            <select data-package-mapper-target="regionSelect" data-action="change->package-mapper#changeRegion">
+              <% meta["editableRegions"].each_with_index do |region, index| %>
+                <option value="<%= index %>"><%= region["id"] %></option>
+              <% end %>
+            </select>
+          </label>
+        <% end %>
+        <button type="button" class="btn subtle" data-action="package-mapper#addPageToRegion">Add page to region</button>
+        <% if @hints["frames"].present? %>
+          <button type="button" class="btn subtle" data-action="package-mapper#useHint">Use IDML hint for page</button>
+        <% end %>
+      </div>
+      <div class="package-mapper-stage" data-package-mapper-target="stage">
+        <img
+          data-package-mapper-target="pageImage"
+          data-action="load->package-mapper#onImageLoad"
+          alt="Page preview"
+        >
+        <div class="package-mapper-overlay" data-package-mapper-target="overlay"></div>
+      </div>
+    </div>
   </div>
 
   <% if @hints["frames"].present? %>
-    <p class="catalog-summary">IDML hint frames: <%= @hints["frames"].size %></p>
+    <p class="catalog-summary">IDML hint frames (primary story): <%= @hints["frames"].size %></p>
   <% end %>
 
   <p><label>meta.json</label></p>
