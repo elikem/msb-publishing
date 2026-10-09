@@ -41,7 +41,7 @@ function cssObjectUrl(cssText) {
  */
 export async function layoutStoryPages(paragraphs, hostEl, title, region) {
   hostEl.innerHTML = ""
-  if (!paragraphs.some((paragraph) => paragraph.trim().length > 0)) return []
+  if (!paragraphs.some((paragraph) => paragraph.trim().length > 0)) return { pages: [], overflow: false }
 
   document.querySelectorAll("style[data-pagedjs-inserted-styles]").forEach((style) => {
     style.dataset.pagedjsStale = "true"
@@ -58,14 +58,16 @@ export async function layoutStoryPages(paragraphs, hostEl, title, region) {
     URL.revokeObjectURL(sheetUrl)
   }
 
-  const pages = [...hostEl.querySelectorAll(".pagedjs_page")].slice(0, region.pages.length)
+  const allPages = [...hostEl.querySelectorAll(".pagedjs_page")]
+  const overflow = allPages.length > region.pages.length
+  const pages = allPages.slice(0, region.pages.length)
   pages.forEach((pageEl, index) => {
     const pageNumber = region.pages[index]
     pinTextBox(pageEl, title, region, pageNumber)
     pageEl.style.backgroundImage = `url(${pageAssetUrl(title, pageNumber)})`
   })
   document.querySelectorAll('style[data-pagedjs-stale="true"]').forEach((style) => style.remove())
-  return pages
+  return { pages, overflow }
 }
 
 export function paragraphsFromEditor(text) {

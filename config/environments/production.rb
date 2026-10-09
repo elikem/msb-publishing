@@ -50,7 +50,7 @@ Rails.application.configure do
   # config.cache_store = :mem_cache_store
 
   # Replace the default in-process and non-durable queuing backend for Active Job.
-  # config.active_job.queue_adapter = :resque
+  config.active_job.queue_adapter = :async
 
   # Raise delivery errors so a misconfigured SMTP server fails loudly
   # instead of silently dropping magic-link emails.

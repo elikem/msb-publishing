@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Admin — My Story Booklet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+  </head>
+  <body class="catalog-shell">
+    <header class="catalog-header">
+      <div>
+        <p class="eyebrow">Admin</p>
+        <h1><%= yield :admin_title %></h1>
+      </div>
+      <div class="header-actions">
+        <%= link_to "Reader catalog", root_path, class: "btn subtle" %>
+      </div>
+    </header>
+    <nav class="catalog-lede">
+      <%= link_to "Home", admin_root_path %> ·
+      <%= link_to "Books", admin_books_path %> ·
+      <%= link_to "Personalizations", admin_personalizations_path %> ·
+      <%= link_to "Admins", admin_admins_path %> ·
+      <%= link_to "Imports", admin_package_imports_path %>
+    </nav>
+    <% if flash[:notice] %><p class="flash flash-notice"><%= flash[:notice] %></p><% end %>
+    <% if flash[:alert] %><p class="flash flash-alert"><%= flash[:alert] %></p><% end %>
+    <%= yield %>
+  </body>
+</html>

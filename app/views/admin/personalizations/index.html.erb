@@ -1,0 +1,24 @@
+<% content_for :admin_title, "Personalizations" %>
+
+<p>
+  <%= link_to "All", admin_personalizations_path %> ·
+  <%= link_to "Outdated", admin_personalizations_path(filter: "outdated") %> ·
+  <%= link_to "Unpublished locale", admin_personalizations_path(filter: "unpublished") %>
+</p>
+
+<ul class="catalog-list">
+  <% @personalizations.each do |p| %>
+    <li class="catalog-item">
+      <%= link_to edit_admin_personalization_path(p), class: "catalog-link" do %>
+        <span class="catalog-title"><%= p.user.email %></span>
+        <span class="catalog-summary"><%= p.title_locale.title.slug %> / <%= p.title_locale.locale %></span>
+        <span class="catalog-meta">
+          pinned rev <%= p.title_revision.revision %> ·
+          current <%= p.title_locale.current_revision&.revision %> ·
+          last saved <%= time_ago_in_words(p.last_saved_at) %> ago
+          <% if p.outdated? %> · <strong>outdated</strong><% end %>
+        </span>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

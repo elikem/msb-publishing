@@ -15,7 +15,7 @@ class TitlesControllerTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_match(/Can You Know God Personally/, response.body)
-    assert_match(/booklets\/cykgp/, response.body)
+    assert_match(/booklets\/cykgp\/en/, response.body)
     refute_match(/Draft Book/, response.body)
   end
 end

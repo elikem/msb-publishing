@@ -1,0 +1,19 @@
+<% content_for :admin_title, "New package import" %>
+
+<%= form_with url: admin_package_imports_path, local: true, multipart: true do %>
+  <p>
+    <label>Existing book slug (leave blank to create)</label><br>
+    <input type="text" name="book_slug" list="book-slugs">
+    <datalist id="book-slugs">
+      <% @titles.each do |t| %><option value="<%= t.slug %>"><% end %>
+    </datalist>
+  </p>
+  <p><label>New book slug</label><br><input type="text" name="new_book_slug"></p>
+  <p><label>New book name</label><br><input type="text" name="new_book_name"></p>
+  <p><label>Locale code</label><br><input type="text" name="locale" required value="en"></p>
+  <p><label>Display title</label><br><input type="text" name="locale_name" required></p>
+  <p><label>Summary</label><br><textarea name="locale_summary"></textarea></p>
+  <p><label>Trim PDF (required)</label><br><input type="file" name="source_pdf" accept="application/pdf" required></p>
+  <p><label>IDML (optional)</label><br><input type="file" name="source_idml" accept=".idml,application/vnd.adobe.indesign-idml-package"></p>
+  <button type="submit" class="btn primary">Start import</button>
+<% end %>

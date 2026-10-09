@@ -1,0 +1,29 @@
+<% content_for :admin_title, "Package #{@relative}" %>
+
+<%= form_with url: admin_update_package_path(@title_locale), method: :patch, local: true, data: { controller: "package-mapper" } do %>
+  <p class="catalog-summary">Page thumbnails for bounding-box reference (edit meta.json regions below).</p>
+  <div class="catalog-list" data-package-mapper-target="thumbs">
+    <% (1..@page_count).each do |n| %>
+      <% nn = format("%02d", n) %>
+      <img
+        src="<%= package_page_asset_path(book: @title_locale.title.slug, locale: @title_locale.locale, file: "page-#{nn}.png") %>"
+        alt="Page <%= n %>"
+        width="120"
+        data-page="<%= n %>"
+        data-action="click->package-mapper#selectPage"
+      >
+    <% end %>
+  </div>
+
+  <% if @hints["frames"].present? %>
+    <p class="catalog-summary">IDML hint frames: <%= @hints["frames"].size %></p>
+  <% end %>
+
+  <p><label>meta.json</label></p>
+  <textarea name="meta_json" rows="24" class="w-full" data-package-mapper-target="meta"><%= @meta_json %></textarea>
+
+  <p><label>template/story.css</label></p>
+  <textarea name="story_css" rows="16" class="w-full"><%= @story_css %></textarea>
+
+  <button type="submit" class="btn primary">Save package</button>
+<% end %>

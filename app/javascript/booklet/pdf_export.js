@@ -154,7 +154,8 @@ export async function downloadPersonalizedPdf(title, pagesByRegion, exportHost =
       }
     }
 
-    pdf.save(`${title.slug}-personalized.pdf`)
+    const locale = title.locale ? `-${title.locale}` : ""
+    pdf.save(`${title.slug}${locale}-personalized.pdf`)
   } finally {
     resetExportHost(host)
   }

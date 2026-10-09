@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 1,
-  "id": "cykgp",
+  "schemaVersion": 2,
   "slug": "cykgp",
+  "locale": "en",
+  "id": "cykgp-en",
   "title": "Can You Know God Personally",
   "source": {
     "directory": "source/cykgp",
@@ -18,7 +19,7 @@
     "accent": "#B23600"
   },
   "assets": {
-    "pagePattern": "/booklets/cykgp/pages/page-{nn}.png"
+    "pagePattern": "pages/page-{nn}.png"
   },
   "template": {
     "storyCss": "template/story.css",

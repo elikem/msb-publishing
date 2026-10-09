@@ -1,0 +1,30 @@
+<% content_for :admin_title, "Books" %>
+
+<ul class="catalog-list">
+  <% @titles.each do |title| %>
+    <li class="catalog-item">
+      <span class="catalog-title"><%= title.name %> (<%= title.slug %>)</span>
+      <ul>
+        <% title.locales.each do |locale| %>
+          <li>
+            <strong><%= locale.locale %></strong> — <%= locale.name %> — <%= locale.status %>
+            <% if locale.sync_status == "blocked" %>
+              <span class="catalog-summary">Sync blocked: <%= locale.sync_message %></span>
+            <% end %>
+            <% rev = locale.current_revision %>
+            <% if rev %>
+              <span class="catalog-meta">rev <%= rev.revision %> · <%= rev.package_digest&.first(12) %>…</span>
+            <% end %>
+            <span>
+              <% unless locale.published? %><%= button_to "Publish", publish_admin_title_locale_path(locale), method: :post, class: "btn subtle" %><% end %>
+              <% if locale.published? %><%= button_to "Unpublish", unpublish_admin_title_locale_path(locale), method: :post, class: "btn subtle" %><% end %>
+              <%= button_to "Register", register_admin_title_locale_path(locale), method: :post, class: "btn subtle" %>
+              <%= link_to "Package", admin_edit_package_path(locale), class: "btn subtle" %>
+              <%= link_to "Download zip", admin_download_package_path(locale), class: "btn subtle" %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    </li>
+  <% end %>
+</ul>

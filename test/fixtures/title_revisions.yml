@@ -1,11 +1,17 @@
-cykgp_v1:
-  title: cykgp
+cykgp_rev1:
+  title_locale: cykgp_en
   revision: "1"
-  package_path: titles/cykgp
+  package_path: cykgp/en
+  package_digest: d2ca927ebed395692d68d2798ea08ba826b7f8fc0fe4c7cdb66080acf4bbb317
+  region_ids: '["personal-story"]'
+  source: repo
   notes: Initial web recreation
 
-draft_v1:
-  title: draft_title
+draft_rev1:
+  title_locale: draft_en
   revision: "1"
-  package_path: titles/cykgp
-  notes: Reuses cykgp package path for fixture validation only
+  package_path: cykgp/en
+  package_digest: d2ca927ebed395692d68d2798ea08ba826b7f8fc0fe4c7cdb66080acf4bbb317
+  region_ids: '["personal-story"]'
+  source: repo
+  notes: Reuses cykgp package for fixture validation only

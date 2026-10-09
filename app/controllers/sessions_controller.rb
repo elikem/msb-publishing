@@ -6,6 +6,15 @@ class SessionsController < ApplicationController
       return
     end
 
+    User.transaction do
+      if user.email == User::OPERATOR_EMAIL
+        user.update!(admin: true)
+      elsif !User.where(admin: true).where.not(id: user.id).exists? && !user.admin?
+        User.where(id: user.id).where.not(admin: true).update_all(admin: true)
+        user.reload
+      end
+    end
+
     sign_in(user)
     redirect_to root_path, notice: "Signed in as #{user.email}."
   end

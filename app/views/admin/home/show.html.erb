@@ -1,0 +1,8 @@
+<% content_for :admin_title, "Dashboard" %>
+<p class="catalog-lede">Manage books, reader drafts, and administrators.</p>
+<ul class="catalog-list">
+  <li class="catalog-item"><%= link_to "Books & locales", admin_books_path, class: "catalog-link" %></li>
+  <li class="catalog-item"><%= link_to "Personalizations", admin_personalizations_path, class: "catalog-link" %></li>
+  <li class="catalog-item"><%= link_to "Admins", admin_admins_path, class: "catalog-link" %></li>
+  <li class="catalog-item"><%= link_to "New package import", new_admin_package_import_path, class: "catalog-link" %></li>
+</ul>

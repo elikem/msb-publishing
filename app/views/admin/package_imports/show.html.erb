@@ -1,0 +1,10 @@
+<% content_for :admin_title, "Import ##{@import.id}" %>
+<p>Status: <strong><%= @import.status %></strong></p>
+<% if @import.error.present? %><p class="flash flash-alert"><%= @import.error %></p><% end %>
+<% if @import.warning.present? %><p class="catalog-summary"><%= @import.warning %></p><% end %>
+<% if @import.status == "failed" %>
+  <%= button_to "Retry", retry_admin_package_import_path(@import), method: :post, class: "btn primary" %>
+<% end %>
+<% if @import.status == "ready" %>
+  <%= link_to "Edit package", admin_edit_package_path(@import.title_locale), class: "btn primary" %>
+<% end %>

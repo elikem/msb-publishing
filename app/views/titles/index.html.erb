@@ -8,7 +8,10 @@
       <p class="catalog-lede">Personalize a published booklet, then download your PDF.</p>
     </div>
     <div class="header-actions">
-      <%= button_to "Sign out", session_path, method: :delete, class: "btn subtle" %>
+      <% if current_user_admin? %>
+        <%= link_to "Admin", admin_root_path, class: "btn subtle" %>
+      <% end %>
+      <%= button_to "Sign out", session_path, method: :delete, class: "btn subtle", data: { turbo: false } %>
     </div>
   </header>
 
@@ -19,19 +22,25 @@
     <p class="flash flash-alert" role="alert"><%= flash[:alert] %></p>
   <% end %>
 
-  <% if @titles.empty? %>
+  <% if @locales.empty? %>
     <p class="catalog-empty">No published titles yet.</p>
   <% else %>
     <ul class="catalog-list">
-      <% @titles.each do |title| %>
+      <% @locales.each do |locale| %>
+        <% pers = @personalizations[locale.id] %>
         <li class="catalog-item">
-          <%= link_to booklet_path(title.slug), class: "catalog-link" do %>
-            <span class="catalog-title"><%= title.name %></span>
-            <% if title.summary.present? %>
-              <span class="catalog-summary"><%= title.summary %></span>
+          <%= link_to booklet_locale_path(slug: locale.title.slug, locale: locale.locale), class: "catalog-link" do %>
+            <span class="catalog-title"><%= locale.name %></span>
+            <span class="catalog-summary"><%= locale.title.slug %> · <%= locale.locale %></span>
+            <% if locale.summary.present? %>
+              <span class="catalog-summary"><%= locale.summary %></span>
             <% end %>
             <span class="catalog-meta">
-              Revision <%= title.current_revision&.revision || "—" %>
+              <% if pers %>
+                Last saved <%= time_ago_in_words(pers.last_saved_at) %> ago
+              <% else %>
+                Not started
+              <% end %>
             </span>
           <% end %>
         </li>

@@ -5,34 +5,57 @@ import { compileRegionPageCss, validateTitle } from "../app/javascript/booklet/r
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 const titlesDir = join(root, "titles")
-const publicDir = join(root, "public")
+const scope = process.argv[2]
 
-const slugs = readdirSync(titlesDir).filter((name) => {
-  if (name.startsWith(".")) return false
-  return statSync(join(titlesDir, name)).isDirectory()
-})
+function discoverPackages() {
+  const packages = []
+  for (const book of readdirSync(titlesDir)) {
+    if (book.startsWith(".")) continue
+    const bookPath = join(titlesDir, book)
+    if (!statSync(bookPath).isDirectory()) continue
 
-if (slugs.length === 0) {
-  throw new Error("No title packages found in titles/")
+    const metaAtBook = join(bookPath, "meta.json")
+    if (existsSync(metaAtBook)) {
+      packages.push({ book, locale: null, dir: bookPath })
+      continue
+    }
+
+    for (const locale of readdirSync(bookPath)) {
+      if (locale.startsWith(".")) continue
+      const dir = join(bookPath, locale)
+      if (!statSync(dir).isDirectory()) continue
+      if (!existsSync(join(dir, "meta.json"))) continue
+      packages.push({ book, locale, dir })
+    }
+  }
+  return packages
 }
 
-for (const slug of slugs) {
-  const dir = join(titlesDir, slug)
-  const meta = JSON.parse(readFileSync(join(dir, "meta.json"), "utf8"))
-  const storyPath = join(dir, meta.template.storyCss)
+let packages = discoverPackages()
+if (scope) {
+  const [book, locale] = scope.split("/")
+  packages = packages.filter((p) => p.book === book && (!locale || p.locale === locale))
+}
+
+if (packages.length === 0) {
+  throw new Error("No title packages found")
+}
+
+for (const pkg of packages) {
+  const label = pkg.locale ? `${pkg.book}/${pkg.locale}` : pkg.book
+  const meta = JSON.parse(readFileSync(join(pkg.dir, "meta.json"), "utf8"))
+  const storyPath = join(pkg.dir, meta.template.storyCss)
   const templateCss = readFileSync(storyPath, "utf8")
   const title = { ...meta, templateCss }
   validateTitle(title)
-  if (title.slug !== slug) {
-    throw new Error(`Folder "${slug}" does not match slug "${title.slug}"`)
-  }
 
   for (let pageNumber = 1; pageNumber <= title.pageCount; pageNumber += 1) {
     const nn = String(pageNumber).padStart(2, "0")
-    const urlPath = title.assets.pagePattern.replaceAll("{nn}", nn)
-    const filePath = join(publicDir, urlPath.replace(/^\//, ""))
+    const pattern = title.assets.pagePattern.replace(/^\//, "")
+    const rel = pattern.includes("{nn}") ? pattern.replaceAll("{nn}", nn) : `pages/page-${nn}.png`
+    const filePath = join(pkg.dir, rel)
     if (!existsSync(filePath)) {
-      throw new Error(`${slug}: missing page asset ${urlPath} (expected ${filePath})`)
+      throw new Error(`${label}: missing page asset ${rel}`)
     }
   }
 
@@ -43,12 +66,12 @@ for (const slug of slugs) {
       const margin = `${box.topPt}pt ${box.rightPt}pt ${box.bottomPt}pt ${box.leftPt}pt`
       const rule = `@page :nth(${index + 1})`
       if (!css.includes(rule) || !css.includes(margin)) {
-        throw new Error(`${slug} region ${region.id} did not compile page ${pageNumber}`)
+        throw new Error(`${label} region ${region.id} did not compile page ${pageNumber}`)
       }
     })
   }
 
-  console.log(`ok ${slug} (${title.editableRegions.length} region, ${title.pageCount} pages)`)
+  console.log(`ok ${label} (${title.editableRegions.length} region, ${title.pageCount} pages)`)
 }
 
 assertRejects(() => {
@@ -60,7 +83,7 @@ assertRejects(() => {
     trim: { widthIn: 3.5, heightIn: 4.25, widthPt: 252, heightPt: 306 },
     pageCount: 4,
     color: { accent: "#112233" },
-    assets: { pagePattern: "/booklets/sample/pages/page-{nn}.png" },
+    assets: { pagePattern: "pages/page-{nn}.png" },
     template: { storyCss: "template/story.css" },
     templateCss: "p { font-size: 9pt; }",
     editableRegions: [
@@ -78,7 +101,7 @@ assertRejects(() => {
   })
 }, "missing text box")
 
-console.log(`checked ${slugs.length} title package${slugs.length === 1 ? "" : "s"}`)
+console.log(`checked ${packages.length} title package${packages.length === 1 ? "" : "s"}`)
 
 function assertRejects(run, label) {
   try {

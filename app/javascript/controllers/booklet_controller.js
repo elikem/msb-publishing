@@ -27,10 +27,18 @@ export default class extends Controller {
     "finishPageCount",
     "finishLede",
     "viewport",
+    "lastSaved",
+    "saveButton",
+    "outdatedBanner",
+    "overflowBanner",
+    "orphanBanner",
+    "leaveDialog",
   ]
 
   static values = {
     meta: Object,
+    draft: Object,
+    saveUrl: String,
   }
 
   connect() {
@@ -44,6 +52,10 @@ export default class extends Controller {
     this.layoutTimer = null
     this.layoutGeneration = 0
     this.touchStartX = null
+    this.dirty = false
+    this.savedSnapshot = ""
+    this.lockVersion = this.draftValue?.lock_version ?? 0
+    this.pendingLeaveHref = null
 
     applyTitleChrome(this.meta)
 
@@ -70,7 +82,12 @@ export default class extends Controller {
     }
 
     this.buildFillBars()
-    this.editorTarget.value = ""
+    const primaryId = this.draftValue?.primary_region_id || this.region.id
+    const regions = this.draftValue?.regions || {}
+    this.editorTarget.value = regions[primaryId] || ""
+    this.savedSnapshot = this.editorTarget.value
+    this.updateLastSavedLabel()
+    this.showBanners()
 
     this.book = createBookNavigator({
       meta: this.meta,
@@ -81,8 +98,14 @@ export default class extends Controller {
 
     this.boundKeydown = (event) => this.onKeydown(event)
     this.boundResize = () => this.onResize()
+    this.boundBeforeUnload = (event) => this.onBeforeUnload(event)
     document.addEventListener("keydown", this.boundKeydown)
     window.addEventListener("resize", this.boundResize)
+    window.addEventListener("beforeunload", this.boundBeforeUnload)
+
+    this.element.querySelectorAll("[data-booklet-leave-link]").forEach((link) => {
+      link.addEventListener("click", (event) => this.onLeaveClick(event))
+    })
 
     this.updateFillMeter(0)
     this.syncWriterCta()
@@ -92,7 +115,117 @@ export default class extends Controller {
   disconnect() {
     document.removeEventListener("keydown", this.boundKeydown)
     window.removeEventListener("resize", this.boundResize)
+    window.removeEventListener("beforeunload", this.boundBeforeUnload)
     clearTimeout(this.layoutTimer)
+  }
+
+  showBanners() {
+    if (this.hasOutdatedBannerTarget && this.draftValue?.outdated) {
+      this.outdatedBannerTarget.hidden = false
+      this.outdatedBannerTarget.textContent =
+        "This book's layout was updated since you last saved. Review how your story fits, then Save to confirm."
+    }
+    if (this.hasOrphanBannerTarget && this.draftValue?.orphaned?.length) {
+      this.orphanBannerTarget.hidden = false
+      this.orphanBannerTarget.textContent =
+        `Some saved text uses region ids no longer in this layout: ${this.draftValue.orphaned.join(", ")}.`
+    }
+  }
+
+  updateLastSavedLabel() {
+    if (!this.hasLastSavedTarget) return
+    const at = this.draftValue?.last_saved_at
+    if (!at) {
+      this.lastSavedTarget.hidden = true
+      return
+    }
+    this.lastSavedTarget.hidden = false
+    let label = `Last saved ${new Date(at).toLocaleString()}`
+    if (this.draftValue?.last_saved_by_admin) label += " (edited by an administrator)"
+    this.lastSavedTarget.textContent = label
+  }
+
+  markDirty() {
+    this.dirty = this.editorTarget.value !== this.savedSnapshot
+  }
+
+  onBeforeUnload(event) {
+    if (!this.dirty) return
+    event.preventDefault()
+    event.returnValue = ""
+  }
+
+  onLeaveClick(event) {
+    if (!this.dirty) return
+    event.preventDefault()
+    this.pendingLeaveHref = event.currentTarget.href || event.currentTarget.action
+    this.leaveDialogTarget.showModal()
+  }
+
+  leaveSave() {
+    this.leaveDialogTarget.close()
+    this.saveDraft().then(() => {
+      if (this.pendingLeaveHref) window.location.href = this.pendingLeaveHref
+    })
+  }
+
+  leaveDiscard() {
+    this.dirty = false
+    this.leaveDialogTarget.close()
+    if (this.pendingLeaveHref) window.location.href = this.pendingLeaveHref
+  }
+
+  leaveCancel() {
+    this.pendingLeaveHref = null
+    this.leaveDialogTarget.close()
+  }
+
+  async saveDraft() {
+    if (!this.saveUrlValue) return
+    const primaryId = this.draftValue?.primary_region_id || this.region.id
+    const body = {
+      regions: { [primaryId]: this.editorTarget.value },
+      lock_version: this.lockVersion,
+    }
+    if (this.hasSaveButtonTarget) {
+      this.saveButtonTarget.disabled = true
+      this.saveButtonTarget.textContent = "Saving…"
+    }
+    try {
+      const response = await fetch(this.saveUrlValue, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": this.csrfToken(),
+        },
+        body: JSON.stringify(body),
+      })
+      const data = await response.json()
+      if (response.status === 409) {
+        alert(data.error || "Conflict")
+        return
+      }
+      if (!response.ok) {
+        alert((data.errors || [data.error]).join("\n"))
+        return
+      }
+      this.lockVersion = data.lock_version
+      this.savedSnapshot = this.editorTarget.value
+      this.dirty = false
+      this.draftValue.outdated = false
+      if (this.hasOutdatedBannerTarget) this.outdatedBannerTarget.hidden = true
+      this.draftValue.last_saved_at = data.last_saved_at
+      this.updateLastSavedLabel()
+    } finally {
+      if (this.hasSaveButtonTarget) {
+        this.saveButtonTarget.disabled = false
+        this.saveButtonTarget.textContent = "Save"
+      }
+    }
+  }
+
+  csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content
   }
 
   buildFillBars() {
@@ -176,13 +309,24 @@ export default class extends Controller {
     const generation = ++this.layoutGeneration
     const paragraphs = paragraphsFromEditor(this.editorTarget.value)
     this.layoutHostTarget.innerHTML = ""
-    const pages = await layoutStoryPages(paragraphs, this.layoutHostTarget, this.meta, this.region)
+    const result = await layoutStoryPages(paragraphs, this.layoutHostTarget, this.meta, this.region)
     if (generation !== this.layoutGeneration) return
+    const pages = result.pages || []
     this.latestStoryPages = pages
     this.pagesByRegion = { [this.region.id]: pages }
     this.book.setRegionPages(this.region.id, pages)
     this.updateFillMeter(pages.length)
     this.syncWriterCta()
+    if (this.hasOverflowBannerTarget) {
+      if (result.overflow) {
+        const last = this.region.pages[this.region.pages.length - 1]
+        this.overflowBannerTarget.hidden = false
+        this.overflowBannerTarget.textContent =
+          `Your story is longer than the ${this.storyPageCapacity} pages available; text past page ${last} will not appear in the PDF.`
+      } else {
+        this.overflowBannerTarget.hidden = true
+      }
+    }
   }
 
   scheduleRelayout() {
@@ -193,6 +337,7 @@ export default class extends Controller {
   }
 
   onEditorInput() {
+    this.markDirty()
     this.syncWriterCta()
     this.scheduleRelayout()
   }
@@ -215,7 +360,7 @@ export default class extends Controller {
     this.book.goTo(this.storyPageStart)
   }
 
-  async savePreview() {
+  async previewStory() {
     await this.relayoutStory()
     this.closeWriter()
     this.book.goTo(this.storyPageStart)
@@ -239,6 +384,11 @@ export default class extends Controller {
   }
 
   onKeydown(event) {
+    if ((event.metaKey || event.ctrlKey) && event.key === "s") {
+      event.preventDefault()
+      this.saveDraft()
+      return
+    }
     if (event.target === this.editorTarget) return
     if (document.body.classList.contains("finish-open")) {
       if (event.key === "Escape") this.closeFinish()
