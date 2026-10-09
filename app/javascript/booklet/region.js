@@ -17,11 +17,18 @@ export function validateTitle(title) {
     throw new Error("Title package must be an object");
   }
 
-  if (title.schemaVersion !== 1) fail("schemaVersion must be 1");
+  const version = title.schemaVersion;
+  if (version !== 1 && version !== 2) fail("schemaVersion must be 1 or 2");
   if (typeof title.slug !== "string" || !SLUG.test(title.slug)) {
     fail("slug must be lowercase letters, numbers, and hyphens");
   }
-  if (title.id !== title.slug) fail("id must match slug");
+  if (version === 2) {
+    if (typeof title.locale !== "string" || !title.locale.trim()) fail("locale is required for schema v2");
+    const expectedId = `${title.slug}-${title.locale}`;
+    if (title.id !== expectedId) fail(`id must be ${expectedId}`);
+  } else if (title.id !== title.slug) {
+    fail("id must match slug");
+  }
   if (typeof title.title !== "string" || !title.title.trim()) fail("title is required");
   if (!Number.isInteger(title.pageCount) || title.pageCount < 1) {
     fail("pageCount must be a positive integer");
@@ -37,8 +44,16 @@ export function validateTitle(title) {
   }
   if (typeof title.templateCss !== "string" || !title.templateCss.trim()) {
     fail("template/story.css is missing");
-  } else if (/@page\b/.test(cssWithoutComments(title.templateCss))) {
-    fail("template/story.css must not contain @page rules; text boxes live in meta.json");
+  } else {
+    const css = cssWithoutComments(title.templateCss);
+    if (/@page\b/.test(css)) {
+      fail("template/story.css must not contain @page rules; text boxes live in meta.json");
+    }
+    if (/@import\b/.test(css)) fail("template/story.css must not contain @import");
+    if (/url\s*\(\s*['"]?(?!data:)/i.test(css)) {
+      fail("template/story.css must not contain external url()");
+    }
+    if (title.templateCss.includes("</style")) fail("template/story.css must not contain </style");
   }
 
   const trim = title.trim;

@@ -1,21 +1,46 @@
 <% content_for :title, "#{@title_meta["title"]} — My Story Booklet" %>
+<% content_for :head do %>
+  <meta name="turbo-visit-control" content="reload">
+<% end %>
+
+<% draft_payload = {
+  regions: @personalization&.regions_hash || {},
+  lock_version: @personalization&.lock_version || 0,
+  last_saved_at: @personalization&.last_saved_at&.iso8601,
+  last_saved_by_admin: @personalization&.last_saved_by_admin?,
+  outdated: @personalization&.outdated? || false,
+  orphaned: @personalization&.orphaned_region_ids || [],
+  primary_region_id: @title_meta.dig("editableRegions", 0, "id")
+} %>
 
 <div
   id="app"
   data-controller="booklet"
   data-booklet-meta-value="<%= ERB::Util.html_escape(@title_meta.to_json) %>"
+  data-booklet-draft-value="<%= ERB::Util.html_escape(draft_payload.to_json) %>"
+  data-booklet-save-url-value="<%= @save_url %>"
+  data-turbo="false"
 >
   <header class="app-header desktop-chrome">
     <div>
       <p class="eyebrow">My Story Booklet</p>
       <h1 data-booklet-target="title"><%= @title_meta["title"] %></h1>
+      <p class="hint" data-booklet-target="lastSaved" hidden></p>
     </div>
     <div class="header-actions">
-      <%= link_to "All titles", titles_path, class: "btn subtle" %>
+      <% if current_user_admin? && !@admin_edit %>
+        <%= link_to "Admin", admin_root_path, class: "btn subtle", data: { booklet_leave_link: true } %>
+      <% end %>
+      <%= link_to "All titles", titles_path, class: "btn subtle", data: { booklet_leave_link: true } %>
+      <button type="button" data-action="booklet#saveDraft" data-booklet-target="saveButton" class="btn primary">Save</button>
       <button type="button" data-action="booklet#downloadPdf" class="btn primary">Download PDF</button>
-      <%= button_to "Sign out", session_path, method: :delete, class: "btn subtle" %>
+      <%= button_to "Sign out", session_path, method: :delete, class: "btn subtle", data: { turbo: false, booklet_leave_link: true } %>
     </div>
   </header>
+
+  <div data-booklet-target="outdatedBanner" class="flash flash-alert app-flash" hidden role="alert"></div>
+  <div data-booklet-target="overflowBanner" class="flash flash-alert app-flash" hidden role="alert"></div>
+  <div data-booklet-target="orphanBanner" class="flash flash-alert app-flash" hidden role="status"></div>
 
   <% if flash[:notice].present? %>
     <p class="flash flash-notice app-flash" role="status"><%= flash[:notice] %></p>
@@ -29,8 +54,7 @@
         <button type="button" data-action="booklet#closeWriter" class="ghost-btn mobile-only">Done</button>
       </div>
       <p class="hint" data-booklet-target="storyHint">
-        Your story pages in the booklet. Press Enter for a new paragraph. The preview updates as you
-        type.
+        Your story pages in the booklet. Press Enter for a new paragraph. The preview updates as you type.
       </p>
       <div class="fill-meter" aria-live="polite">
         <div class="fill-bars" data-booklet-target="fillBars" aria-hidden="true"></div>
@@ -48,9 +72,8 @@
           Jump to story
         </button>
         <button type="button" data-action="booklet#peekBook" class="btn mobile-only">Peek at book</button>
-        <button type="button" data-action="booklet#savePreview" class="btn primary mobile-only">
-          Save &amp; preview
-        </button>
+        <button type="button" data-action="booklet#previewStory" class="btn primary mobile-only">Preview</button>
+        <button type="button" data-action="booklet#saveDraft" class="btn subtle mobile-only">Save</button>
       </div>
     </aside>
 
@@ -126,6 +149,16 @@
       <button type="button" data-action="booklet#closeFinish" class="btn finish-secondary">Back to book</button>
     </div>
   </section>
+
+  <dialog data-booklet-target="leaveDialog" class="finish-screen">
+    <div class="finish-card">
+      <h2>Unsaved changes</h2>
+      <p>Save your story before leaving?</p>
+      <button type="button" data-action="booklet#leaveSave" class="btn primary">Save</button>
+      <button type="button" data-action="booklet#leaveDiscard" class="btn finish-secondary">Discard</button>
+      <button type="button" data-action="booklet#leaveCancel" class="btn finish-secondary">Cancel</button>
+    </div>
+  </dialog>
 
   <div data-booklet-target="layoutHost" class="offscreen" aria-hidden="true"></div>
   <div data-booklet-target="exportHost" id="export-host" class="offscreen" aria-hidden="true"></div>

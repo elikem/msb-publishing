@@ -1,0 +1,44 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "File Access",
+      "fingerprint": "241b20c3d62cdc28a009344011435d237d928efd020f22fb7bdba42197cfee8a",
+      "note": "Paths built from validated slug/locale or page-NN.png allowlist; admin/import only"
+    },
+    {
+      "warning_type": "File Access",
+      "fingerprint": "7b158717529e09f9a2825296ea65a2c7806603f69e4b58f95cd2d17f5d2bd792",
+      "note": "Paths built from validated slug/locale or page-NN.png allowlist; admin/import only"
+    },
+    {
+      "warning_type": "File Access",
+      "fingerprint": "9cfe1b16058f2816cf493298ac0bd52d9a029c44b299ff09c8816c3a50aef456",
+      "note": "Paths built from validated slug/locale or page-NN.png allowlist; admin/import only"
+    },
+    {
+      "warning_type": "File Access",
+      "fingerprint": "b3250c62acca97dd9c9021280f2079912a1a2d95c4f1dee7b5125aa14a3f748a",
+      "note": "Paths built from validated slug/locale or page-NN.png allowlist; admin/import only"
+    },
+    {
+      "warning_type": "File Access",
+      "fingerprint": "b42d0dc5e6324a59bb8727c61b6d4d1319b66d8f1c65192dedf4cae0dffa4e11",
+      "note": "Paths built from validated slug/locale or page-NN.png allowlist; admin/import only"
+    },
+    {
+      "warning_type": "File Access",
+      "fingerprint": "c5177cdaa4789f08ac96f72755ebde0e6930fb5c00db4358b4b6e75822c7f0c6",
+      "note": "Paths built from validated slug/locale or page-NN.png allowlist; admin/import only"
+    },
+    {
+      "warning_type": "File Access",
+      "fingerprint": "d81f9e6efdf016556cb32903fc48cb310e0f4eccb9fdcaa0e07e1270b7dc6d05",
+      "note": "Paths built from validated slug/locale or page-NN.png allowlist; admin/import only"
+    },
+    {
+      "warning_type": "File Access",
+      "fingerprint": "f4a4ed6250d6c4cb480f71bd6e807cad2df8cac2dfa310f234cdd1ccabf3b0c8",
+      "note": "Paths built from validated slug/locale or page-NN.png allowlist; admin/import only"
+    }
+  ]
+}

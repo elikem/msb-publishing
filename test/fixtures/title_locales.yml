@@ -1,0 +1,17 @@
+cykgp_en:
+  title: cykgp
+  locale: en
+  name: Can You Know God Personally
+  summary: Write your own story into the sample-story pages of this booklet.
+  status: published
+  published_at: <%= 1.day.ago %>
+  current_revision: cykgp_rev1
+
+draft_en:
+  title: draft_title
+  locale: en
+  name: Draft Book
+  summary: Not visible in the catalog.
+  status: draft
+  published_at:
+  current_revision:

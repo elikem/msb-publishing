@@ -6,3 +6,6 @@ import { application } from "./application"
 
 import BookletController from "./booklet_controller"
 application.register("booklet", BookletController)
+
+import PackageMapperController from "./package_mapper_controller"
+application.register("package-mapper", PackageMapperController)

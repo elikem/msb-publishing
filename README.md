@@ -43,7 +43,9 @@ bin/rails test
 ## What’s in this app
 
 - Magic-link login (email → signed token → session)
-- Title registry (`Title` / `TitleRevision`) with publish/unpublish — catalog at `/`, booklet at `/booklets/:slug`
+- Book families (`Title`) and language editions (`TitleLocale`) with publish per locale — catalog at `/`, booklet at `/booklets/:slug/:locale`
+- Reader drafts (`personalizations`) with explicit Save, revision pinning, and admin override
+- Admin at `/admin` (bootstrap first verified sign-in + operator email), package import (PDF + optional IDML), package editor
 - Authenticated booklet UI: page-by-page preview, live story layout (Paged.js), client PDF download
 - Title packages under [`titles/`](titles/) — placement in `meta.json`, typography in `template/story.css` (see [docs/title-packages.md](docs/title-packages.md))
 
