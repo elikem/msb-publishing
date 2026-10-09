@@ -30,11 +30,12 @@ module Admin
     end
 
     def download
-      relative = @title_locale.package_relative_path
+      relative = PackageRoot.relative_path_for(@title_locale.title.slug, @title_locale.locale)
       root = PackageRoot.package_dir(relative)
       require "zip"
 
-      zip_path = Rails.root.join("tmp", "#{relative.tr('/', '-')}-package.zip")
+      archive_name = relative.tr("/", "-")
+      zip_path = Rails.root.join("tmp", "#{archive_name}-package.zip")
       Zip::File.open(zip_path, create: true) do |zip|
         zip.add("meta.json", root.join("meta.json").to_s)
         zip.add("AGENTS.md", root.join("AGENTS.md").to_s) if root.join("AGENTS.md").exist?
@@ -45,7 +46,7 @@ module Admin
           zip.add(file.relative_path_from(root).to_s, file.to_s) if file.file?
         end
       end
-      send_file zip_path, filename: "#{relative.tr('/', '-')}.zip", type: "application/zip"
+      send_file zip_path, filename: "#{archive_name}.zip", type: "application/zip"
     end
 
     private

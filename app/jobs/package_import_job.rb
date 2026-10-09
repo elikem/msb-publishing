@@ -9,7 +9,9 @@ class PackageImportJob < ApplicationJob
     tmp = nil
 
     locale = import.title_locale
-    relative = locale.package_relative_path
+    slug = locale.title.slug
+    locale_code = locale.locale
+    relative = PackageRoot.relative_path_for(slug, locale_code)
     dest = PackageRoot.package_dir(relative)
     tmp = PackageRoot.path.join(".tmp", "#{relative}-#{import.id}")
     FileUtils.rm_rf(tmp)

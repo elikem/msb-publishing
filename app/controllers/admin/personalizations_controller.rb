@@ -2,6 +2,7 @@
 
 module Admin
   class PersonalizationsController < BaseController
+    include RegionParams
     def index
       @filter = params[:filter]
       scope = Personalization.includes(:user, :title_locale, :title_revision, :last_saved_by_user)
@@ -21,8 +22,8 @@ module Admin
 
     def update
       @personalization = Personalization.find(params[:id])
-      incoming = if params[:regions].is_a?(ActionController::Parameters) || params[:regions].is_a?(Hash)
-        params.require(:regions).permit!.to_h
+      incoming = if params[:regions].present?
+        permitted_regions(@personalization.title_locale)
       else
         {}
       end

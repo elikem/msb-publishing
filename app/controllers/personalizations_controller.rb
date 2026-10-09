@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 class PersonalizationsController < ApplicationController
+  include RegionParams
+
   before_action :require_authentication
 
   def update
     title_locale = TitleLocale.find_published!(params[:slug], params[:locale])
     personalization = current_user.personalizations.find_or_initialize_by(title_locale: title_locale)
 
-    incoming = params.require(:regions).permit!.to_h.stringify_keys
+    incoming = permitted_regions(title_locale)
     merged = personalization.persisted? ? personalization.regions_hash.merge(incoming) : incoming
     personalization.regions = merged.to_json
     personalization.user = current_user
