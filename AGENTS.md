@@ -28,9 +28,9 @@ Ship a **Rails** app that personalizes titles (starting with CYKGP), provides a 
 
 ## Cursor Cloud specific instructions
 
-- Canonical setup: `bundle install`, `yarn install`, `bin/rails db:prepare`, `bin/rails db:seed`, then `bin/dev` (or `bin/rails server` with `yarn build --watch` / CSS watch). App at http://127.0.0.1:3000. Seed registers and publishes CYKGP.
-- Ruby via rbenv if needed (`.ruby-version`); Node for esbuild/Tailwind.
-- Confirm assets with `yarn build && yarn build:css`.
+- Ruby 3.3.6 lives at `/opt/ruby` and Node 22.14.0 at `/opt/node`. `ruby`, `bundle`, `node`, and `yarn` are symlinked into `/usr/local/bin`, and login shells prepend those directories via `/etc/profile.d/msb-toolchain.sh`. `libvips` is installed. Do not install rbenv.
+- On boot the environment runs `bin/rails db:prepare`, `bin/rails db:seed`, and `bin/dev` in tmux session `msb-dev`. The app is http://127.0.0.1:3000. If `/up` already returns 200, do not start a second server. If it is down, read `/tmp/cursor/start-user/start-user.log`, then run `bin/rails db:prepare`, `bin/rails db:seed`, and `bin/dev`.
+- When Gemfile or JS dependencies change on a branch: `bundle install`, `yarn install --frozen-lockfile`, `yarn build`, and `yarn build:css`. Seed registers and publishes CYKGP.
 - Fixed-page PNGs are in `public/booklets/cykgp/pages/`. Regenerating them is optional and needs `pymupdf`.
 - Development magic links: Letter Opener + a flash shortcut on the sign-in page.
 - Preview loads EB Garamond and Cinzel from Google Fonts (`fonts.googleapis.com` and `fonts.gstatic.com`).
